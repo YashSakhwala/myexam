@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "738410190034",
+    "project_id": "my-exam-c86dc",
+    "storage_bucket": "my-exam-c86dc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:738410190034:android:39faadd5c4e14aa338490b",
+        "android_client_info": {
+          "package_name": "com.example.myexam"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAKA-0aoM9jRbv0anu2XMGkSt9Nv90GOA8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -6,8 +6,9 @@ import 'package:myexam/config/app_style.dart';
 import 'package:myexam/widgets/common_widget/button_view.dart';
 import 'package:circular_seek_bar/circular_seek_bar.dart';
 
-void alertDialogBoxView(BuildContext context) {
-  double progressValue = 70;
+void alertDialogBoxView(
+    {required BuildContext context, required double progress}) {
+  int progressValue = progress.round();
 
   showDialog(
     barrierDismissible: false,
@@ -25,7 +26,7 @@ void alertDialogBoxView(BuildContext context) {
           child: CircularSeekBar(
             width: double.infinity,
             height: double.infinity,
-            progress: progressValue,
+            progress: progress,
             barWidth: 12,
             startAngle: 180,
             sweepAngle: 360,
@@ -36,7 +37,7 @@ void alertDialogBoxView(BuildContext context) {
             outerThumbColor: AppColors.whiteColor,
             child: Center(
               child: Text(
-                "70%",
+                "$progressValue%",
                 style: AppTextStyle.regularTextStyle.copyWith(
                   fontSize: 40,
                   color: AppColors.whiteColor,

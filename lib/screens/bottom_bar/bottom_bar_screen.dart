@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:myexam/config/app_colors.dart';
 import 'package:myexam/config/app_image.dart';
 import 'package:myexam/controller/bottom_bar_controller.dart';
+import 'package:myexam/screens/history/history_screen.dart';
 import 'package:myexam/screens/home/home_screen.dart';
 import 'package:myexam/screens/leaderboard/leaderboard_screen.dart';
 
@@ -21,7 +22,7 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
   List BottomBarScreens = [
     HomeScreen(),
     LeaderBoardScreen(),
-    Center(child: Text("History Screen")),
+    HistoryScreen(),
     SettingScreen(),
   ];
 

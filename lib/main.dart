@@ -19,5 +19,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-//circular_seek_bar: ^1.1.1

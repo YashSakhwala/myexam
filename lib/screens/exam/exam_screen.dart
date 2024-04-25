@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myexam/config/app_colors.dart';
+import 'package:myexam/utils/questions.dart';
 import 'package:myexam/widgets/common_widget/button_view.dart';
 import 'package:myexam/widgets/common_widget/toast_view.dart';
 
@@ -18,39 +19,13 @@ class ExamScreen extends StatefulWidget {
 }
 
 class _ExamScreenState extends State<ExamScreen> {
-  List examList = [
-    {
-      "question":
-          "it has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. it was popularised in 1960s with the release of Letraset sheets containing Lorem lpsum packages, and more recently with desktop",
-      "option": [
-        "When an unknown printer took a gallery of type and scrambled it to",
-        "contrary to popular belief, Lorem lpsum is not simply random text, it has roots in a piece of classical Latin literature from 45 BC",
-        "it is a long established fact that a reader will be",
-        "many desktop publishing packages and web page editors now use Lorem lpsum"
-      ],
-      "answer": 2,
-      "grpValue": -1,
-    },
-    {
-      "question":
-          "Brass gets discoloured in the air because of the presence of which of the following gases in air?",
-      "option": ["Oxygen", "Hydrogen Sulphide", "Carbon dioxide", "Nitrogen"],
-      "answer": 1,
-      "grpValue": -1,
-    },
-    {
-      "question":
-          "Consider the following: Pressurized heavy water reactor (PHWR) Fast breeder reactor (FBR) Advanced Heavy Water Reactor(AHWR) The above three represent the stages of India‘s three stage Nuclear Power programme as follows respectively?",
-      "option": [
-        "Stage I, Stage II, Stage III",
-        "Stage II, Stage I, Stage III",
-        "Stage III, Stage II, Stage I",
-        "Stage II, Stage III, Stage I"
-      ],
-      "answer": 0,
-      "grpValue": -1,
-    },
-  ];
+  List examList = [];
+
+  @override
+  void initState() {
+    examList = Question.examList;
+    super.initState();
+  }
 
   ExamController examController = Get.put(ExamController());
 

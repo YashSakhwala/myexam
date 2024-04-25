@@ -83,9 +83,13 @@ class _CheckingScreenState extends State<CheckingScreen> {
                 return ListTile(
                   title: Text(
                     examList[widget.index]["option"][optionIndex],
-                    style: TextStyle(
-                      fontSize: 16,
+                    style: AppTextStyle.regularTextStyle.copyWith(
                       fontWeight: FontWeight.w400,
+                      color: examList[widget.index]["answer"] == optionIndex
+                          ? AppColors.greenColor
+                          : examList[widget.index]["grpValue"] != optionIndex
+                              ? AppColors.blackColor
+                              : AppColors.redColor,
                     ),
                   ),
                   leading: Container(
@@ -93,7 +97,12 @@ class _CheckingScreenState extends State<CheckingScreen> {
                     height: 24,
                     child: Radio(
                       fillColor: MaterialStateColor.resolveWith(
-                        (states) => AppColors.primaryColor,
+                        (states) => examList[widget.index]["answer"] ==
+                                optionIndex
+                            ? AppColors.greenColor
+                            : examList[widget.index]["grpValue"] != optionIndex
+                                ? AppColors.blackColor
+                                : AppColors.redColor,
                       ),
                       value: optionIndex,
                       groupValue: examList[widget.index]["grpValue"],

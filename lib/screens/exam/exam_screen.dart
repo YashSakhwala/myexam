@@ -104,10 +104,8 @@ class _ExamScreenState extends State<ExamScreen> {
                               },
                               child: Text(
                                 examList[index]["option"][optionIndex],
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                ),
+                                style: AppTextStyle.regularTextStyle
+                                    .copyWith(fontWeight: FontWeight.w400),
                               ),
                             ),
                             leading: Container(
@@ -145,7 +143,7 @@ class _ExamScreenState extends State<ExamScreen> {
                                 );
                                 examController.currentIndex.value++;
                               } else {
-                                Navigator.push(
+                                Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => MarksScreen(

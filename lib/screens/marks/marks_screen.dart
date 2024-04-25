@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:myexam/config/app_colors.dart';
 import 'package:myexam/config/app_image.dart';
 import 'package:myexam/config/app_style.dart';
+import 'package:myexam/screens/bottom_bar/bottom_bar_screen.dart';
 import 'package:myexam/screens/checking/checking_screen.dart';
 import 'package:myexam/widgets/common_widget/button_view.dart';
 import '../../widgets/common_widget/alert_dialog_box_view.dart';
@@ -163,7 +164,15 @@ class _MarksScreenState extends State<MarksScreen> {
           child: ButtonView(
             onTap: () {
               percentage = (widget.total / widget.examList.length * 100);
-              alertDialogBoxView(context: context, progress: percentage);
+              alertDialogBoxView(
+                context: context,
+                progress: percentage,
+                onTap: () {
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(
+                    builder: (context) => BottomBarScreen(),
+                  ));
+                },
+              );
             },
             title: "Continue",
           ),

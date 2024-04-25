@@ -6,12 +6,14 @@ import 'package:myexam/config/app_style.dart';
 import 'package:myexam/widgets/common_widget/button_view.dart';
 import 'package:circular_seek_bar/circular_seek_bar.dart';
 
-void alertDialogBoxView(
-    {required BuildContext context, required double progress}) {
+void alertDialogBoxView({
+  required BuildContext context,
+  required double progress,
+  required Function() onTap,
+}) {
   int progressValue = progress.round();
 
   showDialog(
-    barrierDismissible: false,
     context: context,
     builder: (context) {
       return AlertDialog(
@@ -51,9 +53,7 @@ void alertDialogBoxView(
             height: 40,
           ),
           ButtonView(
-            onTap: () {
-              Navigator.of(context).pop();
-            },
+            onTap: onTap,
             title: "Go to Home",
           ),
         ],

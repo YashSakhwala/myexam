@@ -9,6 +9,7 @@ import 'package:myexam/widgets/common_widget/toast_view.dart';
 
 import '../../config/app_style.dart';
 import '../../controller/exam_controller.dart';
+import '../../widgets/common_class/marks.dart';
 import '../marks/marks_screen.dart';
 
 class ExamScreen extends StatefulWidget {
@@ -41,7 +42,24 @@ class _ExamScreenState extends State<ExamScreen> {
         child: Column(
           children: [
             SizedBox(
-              height: 25,
+              height: 30,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Icon(
+                  Icons.watch_later_outlined,
+                  size: 25,
+                  color: AppColors.greyColor,
+                ),
+                Text(
+                  "12:00",
+                  style: AppTextStyle.largeTextStyle.copyWith(
+                    fontSize: 20,
+                    color: AppColors.greyColor,
+                  ),
+                ),
+              ],
             ),
             Expanded(
               child: PageView.builder(
@@ -150,6 +168,7 @@ class _ExamScreenState extends State<ExamScreen> {
                                         examList: examList, total: total),
                                   ),
                                 );
+                                examController.marksData = MarksData(examList: examList,total: total);
                               }
                             }
                             if (examList[index]["grpValue"] ==

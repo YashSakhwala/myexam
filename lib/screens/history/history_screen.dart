@@ -3,6 +3,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:myexam/screens/history_marks/history_marks_screen.dart';
 
 import '../../config/app_colors.dart';
 import '../../config/app_image.dart';
@@ -50,7 +51,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
             itemCount: examList.length,
             itemBuilder: (context, index) {
               return InkWell(
-                onTap: () {},
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => HistoryMarksScreen(),
+                  ));
+                },
                 child: Container(
                   margin: EdgeInsets.all(8),
                   decoration: BoxDecoration(

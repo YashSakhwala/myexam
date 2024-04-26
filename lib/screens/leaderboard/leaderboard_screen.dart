@@ -30,7 +30,7 @@ class _LeaderBoardScreenState extends State<LeaderBoardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.fromLTRB(25, 30, 25, 0),
+        padding: const EdgeInsets.all(16),
         child: ListView(
           children: [
             Center(
@@ -53,7 +53,9 @@ class _LeaderBoardScreenState extends State<LeaderBoardScreen> {
                     height: 75,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
-                      color: AppColors.whiteColor,
+                      color: index.isEven
+                          ? AppColors.whiteColor
+                          : AppColors.primaryColor.withOpacity(0.1),
                       boxShadow: [
                         BoxShadow(
                           color: AppColors.greyColor.withOpacity(0.1),

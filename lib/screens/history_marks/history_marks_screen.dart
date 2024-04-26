@@ -1,30 +1,23 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'package:myexam/config/app_colors.dart';
-import 'package:myexam/config/app_image.dart';
-import 'package:myexam/config/app_style.dart';
-import 'package:myexam/screens/bottom_bar/bottom_bar_screen.dart';
-import 'package:myexam/screens/checking/checking_screen.dart';
-import 'package:myexam/widgets/common_widget/button_view.dart';
-import '../../widgets/common_widget/circular_seek_bar_view.dart';
+import 'package:get/get.dart';
+import 'package:myexam/controller/exam_controller.dart';
+import 'package:myexam/screens/leaderboard/leaderboard_screen.dart';
+import '../../config/app_colors.dart';
+import '../../config/app_image.dart';
+import '../../config/app_style.dart';
+import '../checking/checking_screen.dart';
 
-class MarksScreen extends StatefulWidget {
-  final List examList;
-  final int total;
-
-  const MarksScreen({
-    super.key,
-    required this.examList,
-    required this.total,
-  });
+class HistoryMarksScreen extends StatefulWidget {
+  const HistoryMarksScreen({super.key});
 
   @override
-  State<MarksScreen> createState() => _MarksScreenState();
+  State<HistoryMarksScreen> createState() => _HistoryMarksScreenState();
 }
 
-class _MarksScreenState extends State<MarksScreen> {
-  double percentage = 0;
+class _HistoryMarksScreenState extends State<HistoryMarksScreen> {
+  ExamController examController = Get.put(ExamController());
 
   @override
   Widget build(BuildContext context) {
@@ -33,12 +26,28 @@ class _MarksScreenState extends State<MarksScreen> {
         padding: const EdgeInsets.fromLTRB(25, 25, 25, 0),
         child: ListView(
           children: [
-            Center(
-              child: Text(
-                "Review",
-                style: AppTextStyle.largeTextStyle
-                    .copyWith(fontWeight: FontWeight.w500),
-              ),
+            Row(
+              children: [
+                Spacer(),
+                Text(
+                  "Review",
+                  style: AppTextStyle.largeTextStyle
+                      .copyWith(fontWeight: FontWeight.w500),
+                ),
+                Spacer(),
+                InkWell(
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => LeaderBoardScreen(),
+                    ));
+                  },
+                  child: Image.asset(
+                    AppImages.blankTrophy,
+                    height: 23,
+                    color: AppColors.primaryColor,
+                  ),
+                ),
+              ],
             ),
             SizedBox(
               height: 30,
@@ -47,7 +56,7 @@ class _MarksScreenState extends State<MarksScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "${widget.total}/${widget.examList.length}",
+                  "${examController.marksData.total}/${examController.marksData.examList.length}",
                   style: AppTextStyle.regularTextStyle,
                 ),
                 Column(
@@ -57,7 +66,7 @@ class _MarksScreenState extends State<MarksScreen> {
                       style: AppTextStyle.largeTextStyle.copyWith(fontSize: 20),
                     ),
                     Text(
-                      "${(widget.total / widget.examList.length * 100).round()}%",
+                      "${(examController.marksData.total! / examController.marksData.examList.length * 100).round()}%",
                       style: AppTextStyle.regularTextStyle
                           .copyWith(color: AppColors.primaryColor),
                     ),
@@ -90,7 +99,7 @@ class _MarksScreenState extends State<MarksScreen> {
                 crossAxisSpacing: 15,
                 mainAxisSpacing: 15,
               ),
-              itemCount: widget.examList.length,
+              itemCount: examController.marksData.examList.length,
               itemBuilder: (context, index) {
                 return InkWell(
                   onTap: () {
@@ -123,15 +132,19 @@ class _MarksScreenState extends State<MarksScreen> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(color: AppColors.primaryColor),
-                            color: widget.examList[index]["grpValue"] ==
-                                    widget.examList[index]["answer"]
+                            color: examController.marksData.examList[index]
+                                        ["grpValue"] ==
+                                    examController.marksData.examList[index]
+                                        ["answer"]
                                 ? AppColors.greenColor
                                 : AppColors.redColor,
                           ),
                           child: Center(
                             child: Image.asset(
-                              widget.examList[index]["grpValue"] ==
-                                      widget.examList[index]["answer"]
+                              examController.marksData.examList[index]
+                                          ["grpValue"] ==
+                                      examController.marksData.examList[index]
+                                          ["answer"]
                                   ? AppImages.right
                                   : AppImages.wrong,
                               height: 30,
@@ -154,32 +167,6 @@ class _MarksScreenState extends State<MarksScreen> {
               },
             ),
           ],
-        ),
-      ),
-      bottomNavigationBar: Material(
-        elevation: 25,
-        child: Container(
-          padding: EdgeInsets.all(20),
-          height: 90,
-          color: AppColors.whiteColor,
-          child: ButtonView(
-            onTap: () {
-              percentage = (widget.total / widget.examList.length * 100);
-              CircularSeekBarView(
-                context: context,
-                progress: percentage,
-                onTap: () {
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                      builder: (context) => BottomBarScreen(),
-                    ),
-                    (route) => false,
-                  );
-                },
-              );
-            },
-            title: "Continue",
-          ),
         ),
       ),
     );

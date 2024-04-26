@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:myexam/config/app_colors.dart';
 import 'package:myexam/config/app_image.dart';
 import 'package:myexam/config/app_style.dart';
-import 'package:myexam/screens/exam/exam_screen.dart';
+import 'package:myexam/screens/exam_detail/exam_detail_screen.dart';
 import 'package:myexam/widgets/common_widget/button_view.dart';
 import 'package:myexam/widgets/common_widget/text_field_view.dart';
 
@@ -124,7 +124,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   return InkWell(
                     onTap: () {
                       Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => ExamScreen(),
+                        builder: (context) => ExamDetailScreen(),
                       ));
                     },
                     child: Container(

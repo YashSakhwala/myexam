@@ -33,8 +33,11 @@ class _CheckingScreenState extends State<CheckingScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
+            SizedBox(
+              height: 40,
+            ),
             Container(
               width: MediaQuery.of(context).size.width,
               padding: EdgeInsets.all(16),

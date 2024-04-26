@@ -6,7 +6,7 @@ import 'package:myexam/config/app_style.dart';
 import 'package:myexam/widgets/common_widget/button_view.dart';
 import 'package:circular_seek_bar/circular_seek_bar.dart';
 
-void alertDialogBoxView({
+void CircularSeekBarView({
   required BuildContext context,
   required double progress,
   required Function() onTap,
@@ -37,6 +37,7 @@ void alertDialogBoxView({
             outerThumbRadius: 6,
             outerThumbStrokeWidth: 10,
             outerThumbColor: AppColors.whiteColor,
+            
             child: Center(
               child: Text(
                 "$progressValue%",

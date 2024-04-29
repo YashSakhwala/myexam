@@ -41,6 +41,10 @@ dependencies:
   fluttertoast: ^8.2.5
   lottie: ^3.1.0
   circular_seek_bar: ^1.1.1
+  shared_preferences: ^2.2.3
+  image_picker: ^1.1.0
+  firebase_storage: ^11.7.4
+  cloud_firestore: ^4.17.2
 
 dev_dependencies:
   flutter_test:

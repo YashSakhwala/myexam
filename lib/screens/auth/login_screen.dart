@@ -103,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 title: "Sign in",
                 onTap: () {
                   if (_formkey.currentState!.validate()) {
-                    authController.LogIn(
+                    authController.logIn(
                       email: email.text,
                       password: password.text,
                       context: context,

@@ -4,5 +4,4 @@ class LocalStorage {
   static late SharedPreferences sharedPreferences;
 
   static String logIn = "logIn";
-  static String userId = "userId";
 }

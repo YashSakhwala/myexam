@@ -18,6 +18,7 @@ class TextFieldView extends StatelessWidget {
   final bool emailValidator;
   final bool phoneNoValidator;
   final bool passwordValidator;
+  final TextInputType? keyboardType;
 
   const TextFieldView({
     super.key,
@@ -32,6 +33,7 @@ class TextFieldView extends StatelessWidget {
     this.emailValidator = false,
     this.phoneNoValidator = false,
     this.passwordValidator = false,
+    this.keyboardType,
   });
 
   @override
@@ -40,6 +42,7 @@ class TextFieldView extends StatelessWidget {
       controller: controller,
       cursorColor: AppColors.primaryColor,
       obscureText: obscureText!,
+      keyboardType: keyboardType,
       decoration: InputDecoration(
         filled: fullTextView,
         fillColor: AppColors.whiteColor,
@@ -81,7 +84,7 @@ class TextFieldView extends StatelessWidget {
                 isEmailValidator: emailValidator,
                 isPasswordValidator: passwordValidator,
                 isPhoneNumberValidator: phoneNoValidator,
-                message: hintText,
+                message: labelText,
                 value: value,
               )
           : null,

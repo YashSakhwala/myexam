@@ -1,8 +1,11 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:io';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:myexam/controller/auth_controller.dart';
 import 'package:myexam/screens/auth/login_screen.dart';
 import 'package:myexam/widgets/common_widget/toast_view.dart';
@@ -57,42 +60,60 @@ class _SignUpScreenState extends State<SignUpScreen> {
               SizedBox(
                 height: 50,
               ),
-              Stack(
-                children: [
-                  Container(
-                    height: 82,
-                    width: 82,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.primaryColor),
-                      color: AppColors.whiteColor,
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                        image: Image.asset(
-                          AppImages.fillProfile,
-                          color: AppColors.redColor,
-                          scale: 12,
-                        ).image,
+              InkWell(
+                onTap: () async {
+                  ImagePicker imagePicker = ImagePicker();
+
+                  XFile? xFile =
+                      await imagePicker.pickImage(source: ImageSource.gallery);
+
+                  authController.imagePath.value = xFile!.path;
+                },
+                child: Stack(
+                  children: [
+                    Obx(
+                      () => Container(
+                        height: 82,
+                        width: 82,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.primaryColor),
+                          color: AppColors.whiteColor,
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                            image: authController.imagePath.value.isEmpty
+                                ? Image.asset(
+                                    AppImages.fillProfile,
+                                    scale: 12,
+                                  ).image
+                                : Image.file(
+                                        File(authController.imagePath.value))
+                                    .image,
+                            fit: authController.imagePath.value.isEmpty
+                                ? BoxFit.none
+                                : BoxFit.fill,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    left: 58,
-                    child: Container(
-                      height: 23,
-                      width: 23,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: AppColors.primaryColor,
-                      ),
-                      child: Icon(
-                        Icons.add,
-                        size: 17,
-                        color: AppColors.whiteColor,
+                    Positioned(
+                      bottom: 0,
+                      left: 58,
+                      child: Container(
+                        height: 23,
+                        width: 23,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.primaryColor,
+                        ),
+                        child: Icon(
+                          Icons.add,
+                          size: 17,
+                          color: AppColors.whiteColor,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               SizedBox(
                 height: 20,
@@ -109,6 +130,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               TextFieldView(
                 labelText: "Phone No",
                 controller: phoneNo,
+                keyboardType: TextInputType.phone,
                 needValidator: true,
                 phoneNoValidator: true,
               ),
@@ -182,10 +204,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   if (_formkey.currentState!.validate()) {
                     if (password.text != verifyPassword.text) {
                       toastView(msg: "Both passwords are not same");
+                    } else if (authController.imagePath.value.isEmpty) {
+                      toastView(msg: "Please select profile image");
                     } else {
-                      authController.SignUp(
+                      authController.signUp(
                         email: email.text,
                         password: password.text,
+                        phoneNo: phoneNo.text,
                         context: context,
                       );
                     }

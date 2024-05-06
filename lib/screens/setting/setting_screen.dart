@@ -1,12 +1,19 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, use_build_context_synchronously
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:myexam/screens/profile/profile_screen.dart';
-import 'package:myexam/widgets/common_widget/button_view.dart';
+import 'package:get/get.dart';
 import '../../config/app_colors.dart';
 import '../../config/app_image.dart';
 import '../../config/app_style.dart';
+import '../../config/local_storage.dart';
+import '../../controller/auth_controller.dart';
+import '../../widgets/common_widget/alert_dialog_box_view.dart';
+import '../../widgets/common_widget/button_view.dart';
+import '../../widgets/common_widget/indicator_view.dart';
+import '../profile/profile_screen.dart';
+import '../splash_screen.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -16,6 +23,34 @@ class SettingScreen extends StatefulWidget {
 }
 
 class _SettingScreenState extends State<SettingScreen> {
+  AuthController authController = Get.put(AuthController());
+
+  void logOut() {
+    showAlertDialogBox(
+      context: context,
+      yesOnTap: () async {
+        indicatorView(context);
+
+        LocalStorage.sharedPreferences.clear();
+
+        FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+
+        await firebaseAuth.signOut();
+
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) => SplashScreen(),
+            ),
+            (route) => false);
+      },
+      noOnTap: () {
+        Navigator.of(context).pop();
+      },
+      title: "Log Out",
+      subTitle: "Are you sure you want to log out?",
+    );
+  }
+
   List profileItems = [
     {
       "icon": AppImages.torch,
@@ -45,43 +80,61 @@ class _SettingScreenState extends State<SettingScreen> {
                 padding: const EdgeInsets.all(25),
                 child: Column(
                   children: [
-                    Row(
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Lukasz",
-                              style: AppTextStyle.largeTextStyle.copyWith(
-                                fontSize: 35,
-                                color: AppColors.whiteColor,
+                    Obx(
+                      () => Row(
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                authController.userData["name"],
+                                style: AppTextStyle.largeTextStyle.copyWith(
+                                  fontSize: 35,
+                                  color: AppColors.whiteColor,
+                                ),
                               ),
-                            ),
-                            Text(
-                              "lukasz1020@gmail.com",
-                              style: AppTextStyle.smallTextStyle.copyWith(
-                                fontSize: 12,
-                                color: AppColors.whiteColor,
+                              Text(
+                                authController.userData["email"],
+                                style: AppTextStyle.smallTextStyle.copyWith(
+                                  fontSize: 12,
+                                  color: AppColors.whiteColor,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        Spacer(),
-                        Container(
-                          height: 75,
-                          width: 75,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: AppColors.whiteColor,
+                            ],
                           ),
-                          child: Center(
-                            child: Image.asset(
-                              AppImages.fillProfile,
-                              height: 40,
+                          Spacer(),
+                          Container(
+                            height: 75,
+                            width: 75,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: AppColors.whiteColor,
+                            ),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                CircularProgressIndicator(
+                                  color: AppColors.primaryColor,
+                                  strokeWidth: 2,
+                                ),
+                                Container(
+                                  height: 75,
+                                  width: 75,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                      image: Image.network(
+                                        authController.userData["image"],
+                                      ).image,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     SizedBox(
                       height: 30,
@@ -100,7 +153,7 @@ class _SettingScreenState extends State<SettingScreen> {
                               ),
                             ),
                             Text(
-                              "Complete the exam",
+                              "Exam taken",
                               style: AppTextStyle.smallTextStyle.copyWith(
                                 fontSize: 14,
                                 color: AppColors.whiteColor,
@@ -174,7 +227,9 @@ class _SettingScreenState extends State<SettingScreen> {
               padding: const EdgeInsets.all(25),
               child: ButtonView(
                 title: "Log Out",
-                onTap: () {},
+                onTap: () {
+                  logOut();
+                },
                 containerColor: AppColors.primaryColor.withOpacity(0.3),
                 titleColor: AppColors.primaryColor,
               ),

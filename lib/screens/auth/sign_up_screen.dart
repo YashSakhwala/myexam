@@ -25,6 +25,7 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   AuthController authController = Get.put(AuthController());
 
+final TextEditingController name = TextEditingController();
   final TextEditingController email = TextEditingController();
   final TextEditingController phoneNo = TextEditingController();
   final TextEditingController password = TextEditingController();
@@ -119,6 +120,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 height: 20,
               ),
               TextFieldView(
+                labelText: "Name",
+                controller: name,
+                needValidator: true,
+                nameValidator: true,
+              ),
+              SizedBox(
+                height: 5,
+              ),
+              TextFieldView(
                 labelText: "Email",
                 controller: email,
                 needValidator: true,
@@ -208,6 +218,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       toastView(msg: "Please select profile image");
                     } else {
                       authController.signUp(
+                        name: name.text,
                         email: email.text,
                         password: password.text,
                         phoneNo: phoneNo.text,

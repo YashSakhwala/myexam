@@ -1,7 +1,9 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:myexam/config/app_style.dart';
+import 'package:myexam/controller/exam_detail_controller.dart';
 import 'package:myexam/screens/exam/exam_screen.dart';
 import 'package:myexam/widgets/common_widget/button_view.dart';
 
@@ -13,6 +15,8 @@ class ExamDetailScreen extends StatefulWidget {
 }
 
 class _ExamDetailScreenState extends State<ExamDetailScreen> {
+  ExamDetailController examDetailController = Get.put(ExamDetailController());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,10 +62,10 @@ class _ExamDetailScreenState extends State<ExamDetailScreen> {
                   style: AppTextStyle.regularTextStyle.copyWith(fontSize: 18),
                 ),
                 SizedBox(
-                  width: 52,
+                  width: 56,
                 ),
                 Text(
-                  "Engilsh",
+                  examDetailController.examDetail["subject"],
                   style: AppTextStyle.smallTextStyle,
                 ),
               ],
@@ -77,10 +81,29 @@ class _ExamDetailScreenState extends State<ExamDetailScreen> {
                   style: AppTextStyle.regularTextStyle.copyWith(fontSize: 18),
                 ),
                 SizedBox(
-                  width: 58,
+                  width: 67,
                 ),
                 Text(
-                  "10",
+                  examDetailController.examDetail["mcq"].toString(),
+                  style: AppTextStyle.smallTextStyle,
+                ),
+              ],
+            ),
+            Divider(),
+            SizedBox(
+              height: 10,
+            ),
+            Row(
+              children: [
+                Text(
+                  "Exam duration: ",
+                  style: AppTextStyle.regularTextStyle.copyWith(fontSize: 18),
+                ),
+                SizedBox(
+                  width: 36,
+                ),
+                Text(
+                  examDetailController.examDetail["examDuration"],
                   style: AppTextStyle.smallTextStyle,
                 ),
               ],
@@ -96,10 +119,10 @@ class _ExamDetailScreenState extends State<ExamDetailScreen> {
                   style: AppTextStyle.regularTextStyle.copyWith(fontSize: 18),
                 ),
                 SizedBox(
-                  width: 99,
+                  width: 115,
                 ),
                 Text(
-                  "31/02/1524",
+                  examDetailController.examDetail["date"],
                   style: AppTextStyle.smallTextStyle,
                 ),
               ],
@@ -115,10 +138,10 @@ class _ExamDetailScreenState extends State<ExamDetailScreen> {
                   style: AppTextStyle.regularTextStyle.copyWith(fontSize: 18),
                 ),
                 SizedBox(
-                  width: 95,
+                  width: 112,
                 ),
                 Text(
-                  "12:00",
+                  examDetailController.examDetail["time"],
                   style: AppTextStyle.smallTextStyle,
                 ),
               ],

@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:myexam/config/app_colors.dart';
 import 'package:myexam/config/app_style.dart';
 
@@ -15,10 +16,13 @@ class TextFieldView extends StatelessWidget {
   final TextEditingController controller;
   final bool? fullTextView;
   final bool needValidator;
+  final bool nameValidator;
   final bool emailValidator;
   final bool phoneNoValidator;
   final bool passwordValidator;
   final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final bool? enabled;
 
   const TextFieldView({
     super.key,
@@ -30,19 +34,25 @@ class TextFieldView extends StatelessWidget {
     this.hintText,
     this.prefixIcon,
     this.needValidator = false,
+    this.nameValidator = false,
     this.emailValidator = false,
     this.phoneNoValidator = false,
     this.passwordValidator = false,
     this.keyboardType,
+    this.inputFormatters,
+    this.enabled,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      style: AppTextStyle.regularTextStyle.copyWith(fontSize: 18),
       controller: controller,
+      keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
+      enabled: enabled,
       cursorColor: AppColors.primaryColor,
       obscureText: obscureText!,
-      keyboardType: keyboardType,
       decoration: InputDecoration(
         filled: fullTextView,
         fillColor: AppColors.whiteColor,

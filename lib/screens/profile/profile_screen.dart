@@ -1,10 +1,15 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:myexam/config/app_image.dart';
-import 'package:myexam/widgets/common_widget/button_view.dart';
-import 'package:myexam/widgets/common_widget/text_field_view.dart';
+import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+
 import '../../config/app_colors.dart';
+import '../../controller/auth_controller.dart';
+import '../../widgets/common_widget/button_view.dart';
+import '../../widgets/common_widget/text_field_view.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -14,9 +19,19 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  AuthController authController = Get.put(AuthController());
+
   final TextEditingController name = TextEditingController();
   final TextEditingController email = TextEditingController();
   final TextEditingController phoneNo = TextEditingController();
+
+  @override
+  void initState() {
+    name.text = authController.userData["name"];
+    email.text = authController.userData["email"];
+    phoneNo.text = authController.userData["phoneNo"];
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,38 +41,64 @@ class _ProfileScreenState extends State<ProfileScreen> {
           SizedBox(
             height: 70,
           ),
-          Stack(
-            children: [
-              Container(
-                height: 140,
-                width: 140,
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.primaryColor),
-                  shape: BoxShape.circle,
-                  image: DecorationImage(
-                    image: Image.asset(AppImages.boy).image,
-                    fit: BoxFit.cover,
+          InkWell(
+            onTap: () async {
+              ImagePicker imagePicker = ImagePicker();
+
+              XFile? xFile =
+                  await imagePicker.pickImage(source: ImageSource.gallery);
+
+              authController.imagePath.value = xFile!.path;
+            },
+            child: Stack(
+              children: [
+                Obx(
+                  () => Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        color: AppColors.primaryColor,
+                        strokeWidth: 2,
+                      ),
+                      Container(
+                        height: 140,
+                        width: 140,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.primaryColor),
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                            image: authController.imagePath.value.isNotEmpty
+                                ? FileImage(
+                                    File(authController.imagePath.value))
+                                : Image.network(
+                                        authController.userData["image"])
+                                    .image,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  height: 45,
-                  width: 45,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.primaryColor,
-                  ),
-                  child: Icon(
-                    Icons.add,
-                    size: 25,
-                    color: AppColors.whiteColor,
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    height: 45,
+                    width: 45,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.primaryColor,
+                    ),
+                    child: Icon(
+                      Icons.add,
+                      size: 25,
+                      color: AppColors.whiteColor,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           SizedBox(
             height: 30,
@@ -70,29 +111,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 shrinkWrap: true,
                 children: [
                   TextFieldView(
-                    controller: name,
                     labelText: "Name",
+                    controller: name,
                   ),
                   SizedBox(
                     height: 15,
                   ),
                   TextFieldView(
-                    controller: email,
                     labelText: "Email",
+                    controller: email,
+                    enabled: false,
                   ),
                   SizedBox(
                     height: 15,
                   ),
                   TextFieldView(
-                    controller: phoneNo,
                     labelText: "Phone no",
+                    controller: phoneNo,
                   ),
                   SizedBox(
                     height: 70,
                   ),
                   ButtonView(
                     title: "Save changes",
-                    onTap: () {},
+                    onTap: () {
+                      authController.updateProfile(
+                        name: name.text,
+                        email: email.text,
+                        phoneNo: phoneNo.text,
+                        context: context,
+                      );
+                    },
                   ),
                 ],
               ),

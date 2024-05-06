@@ -1,19 +1,24 @@
+// ignore_for_file: use_build_context_synchronously, prefer_const_constructors, avoid_print
+
 import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:myexam/config/local_storage.dart';
-import 'package:myexam/screens/bottom_bar/bottom_bar_screen.dart';
-import 'package:myexam/widgets/common_widget/indicator_view.dart';
-import 'package:myexam/widgets/common_widget/toast_view.dart';
+
+import '../config/local_storage.dart';
+import '../screens/bottom_bar/bottom_bar_screen.dart';
+import '../widgets/common_widget/indicator_view.dart';
+import '../widgets/common_widget/toast_view.dart';
 
 class AuthController extends GetxController {
   final RxBool isLoginPasswordShow = true.obs;
   final RxBool isSignUpPasswordShow = true.obs;
   final RxBool isVerifyPasswordShow = true.obs;
   final RxString imagePath = "".obs;
+  final RxMap<String, dynamic> userData = <String, dynamic>{}.obs;
 
   Future<void> logIn({
     required String email,
@@ -22,6 +27,7 @@ class AuthController extends GetxController {
   }) async {
     try {
       indicatorView(context);
+
       final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
 
       final UserCredential userCredential = await firebaseAuth
@@ -30,18 +36,24 @@ class AuthController extends GetxController {
       print(userCredential.user!.uid);
 
       await LocalStorage.sharedPreferences.setBool(LocalStorage.logIn, true);
+      await LocalStorage.sharedPreferences
+          .setString(LocalStorage.userId, userCredential.user!.uid);
 
-      Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => BottomBarScreen(),
-      ));
+      await getProfileData(context: context);
+
+      Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (context) => BottomBarScreen(),
+          ),
+          (route) => false);
     } catch (e) {
-      toastView(msg: "Email or password incorrect");
-
+      toastView(msg: "Email or password is incorrect");
       Navigator.of(context).pop();
     }
   }
 
   Future<void> signUp({
+    required String name,
     required String email,
     required String password,
     required String phoneNo,
@@ -62,9 +74,9 @@ class AuthController extends GetxController {
       String url = "";
 
       String imageName = DateTime.now().millisecondsSinceEpoch.toString();
-      String ImageExt = imagePath.value.split("/").last.split(".").last;
+      String imageExt = imagePath.value.split("/").last.split(".").last;
 
-      Reference reference = firebaseStorage.ref("$imageName.$ImageExt");
+      Reference reference = firebaseStorage.ref("$imageName.$imageExt");
 
       UploadTask uploadTask = reference.putFile(File(imagePath.value));
 
@@ -75,26 +87,118 @@ class AuthController extends GetxController {
         toastView(msg: "File doesn't upload");
       }
 
-      // String url = await reference.getDownloadURL();
-
       FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
 
       await firebaseFirestore
-          .collection("Teacher")
+          .collection("Student")
           .doc(userCredential.user!.uid)
           .set({
+        "name": name,
         "email": email,
         "phoneNo": phoneNo,
         "image": url,
       });
 
       await LocalStorage.sharedPreferences.setBool(LocalStorage.logIn, true);
+      await LocalStorage.sharedPreferences
+          .setString(LocalStorage.userId, userCredential.user!.uid);
 
-      Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => BottomBarScreen(),
-      ));
+      getProfileData(context: context);
+
+      Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (context) => BottomBarScreen(),
+          ),
+          (route) => false);
     } catch (e) {
       toastView(msg: "User is already exist");
+      Navigator.of(context).pop();
+    }
+  }
+
+  Future<void> getProfileData({required BuildContext context}) async {
+    FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
+
+    String? userId =
+        LocalStorage.sharedPreferences.getString(LocalStorage.userId);
+
+    var data = await firebaseFirestore.collection("Student").doc(userId).get();
+
+    userData.value = data.data() ?? {};
+
+    print(data.data());
+
+    Future.delayed(
+      Duration(seconds: 4),
+      () {
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (context) => BottomBarScreen(),
+            ),
+            (route) => false);
+      },
+    );
+  }
+
+  Future<void> updateProfile({
+    required String name,
+    required String email,
+    required String phoneNo,
+    required BuildContext context,
+  }) async {
+    try {
+      indicatorView(context);
+
+      FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
+
+      String? userId =
+          LocalStorage.sharedPreferences.getString(LocalStorage.userId);
+
+      FirebaseStorage firebaseStorage = FirebaseStorage.instance;
+
+      String url = "";
+      if (imagePath.value.isNotEmpty) {
+        String imageName = DateTime.now().millisecondsSinceEpoch.toString();
+        String imageExt = imagePath.value.split("/").last.split(".").last;
+
+        Reference reference = firebaseStorage.ref("$imageName.$imageExt");
+
+        UploadTask uploadTask = reference.putFile(File(imagePath.value));
+
+        TaskSnapshot taskSnapshot = await uploadTask;
+        if (taskSnapshot.state == TaskState.success) {
+          url = await reference.getDownloadURL();
+
+          await firebaseFirestore.collection("Student").doc(userId).update({
+            "image": url,
+          });
+
+          userData["image"] = url;
+        } else {
+          toastView(msg: "Failed to upload image");
+        }
+      }
+
+      await firebaseFirestore.collection("Student").doc(userId).update({
+        "name": name,
+        "email": email,
+        "phoneNo": phoneNo,
+      });
+
+      Map<String, dynamic> data = {
+        "name": name,
+        "email": email,
+        "phoneNo": phoneNo,
+        "image": imagePath.value.isNotEmpty ? url : userData["image"],
+      };
+
+      userData.value = data;
+
+      toastView(msg: "Profile updated successfully");
+
+      Navigator.of(context).pop();
+    } catch (e) {
+      toastView(msg: "Failed to update profile");
 
       Navigator.of(context).pop();
     }

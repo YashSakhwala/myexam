@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myexam/config/app_colors.dart';
+import 'package:myexam/controller/exam_detail_controller.dart';
 import 'package:myexam/utils/questions.dart';
 import 'package:myexam/widgets/common_widget/button_view.dart';
 import 'package:myexam/widgets/common_widget/toast_view.dart';
@@ -34,6 +35,8 @@ class _ExamScreenState extends State<ExamScreen> {
 
   int total = 0;
 
+  ExamDetailController examDetailController = Get.put(ExamDetailController());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,7 +56,7 @@ class _ExamScreenState extends State<ExamScreen> {
                   color: AppColors.greyColor,
                 ),
                 Text(
-                  "12:00",
+                  examDetailController.examDetail["examDuration"],
                   style: AppTextStyle.largeTextStyle.copyWith(
                     fontSize: 20,
                     color: AppColors.greyColor,
@@ -65,7 +68,7 @@ class _ExamScreenState extends State<ExamScreen> {
               child: PageView.builder(
                 physics: NeverScrollableScrollPhysics(),
                 controller: pageController,
-                itemCount: examList.length,
+                itemCount: examDetailController.examDetail["questions"].length,
                 itemBuilder: (context, index) {
                   return ListView(
                     children: [
@@ -98,7 +101,8 @@ class _ExamScreenState extends State<ExamScreen> {
                               height: 20,
                             ),
                             Text(
-                              examList[index]["question"],
+                              examDetailController.examDetail["questions"]
+                                  [index]["question"],
                               style: AppTextStyle.regularTextStyle
                                   .copyWith(color: AppColors.whiteColor),
                               textAlign: TextAlign.justify,
@@ -113,6 +117,7 @@ class _ExamScreenState extends State<ExamScreen> {
                         shrinkWrap: true,
                         physics: NeverScrollableScrollPhysics(),
                         itemCount: examList[index]["option"].length,
+                        // itemCount: examDetailController.examDetail["questions"]["options"].length,
                         itemBuilder: (BuildContext context, int optionIndex) {
                           return ListTile(
                             title: InkWell(
@@ -168,7 +173,8 @@ class _ExamScreenState extends State<ExamScreen> {
                                         examList: examList, total: total),
                                   ),
                                 );
-                                examController.marksData = MarksData(examList: examList,total: total);
+                                examController.marksData =
+                                    MarksData(examList: examList, total: total);
                               }
                             }
                             if (examList[index]["grpValue"] ==

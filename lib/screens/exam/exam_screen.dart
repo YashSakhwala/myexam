@@ -1,41 +1,119 @@
 // ignore_for_file: prefer_const_constructors, sized_box_for_whitespace
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myexam/config/app_colors.dart';
 import 'package:myexam/controller/exam_detail_controller.dart';
-import 'package:myexam/utils/questions.dart';
+import 'package:myexam/screens/bottom_bar/bottom_bar_screen.dart';
 import 'package:myexam/widgets/common_widget/button_view.dart';
 import 'package:myexam/widgets/common_widget/toast_view.dart';
-
 import '../../config/app_style.dart';
-import '../../controller/exam_controller.dart';
-import '../../widgets/common_class/marks.dart';
-import '../marks/marks_screen.dart';
 
 class ExamScreen extends StatefulWidget {
-  const ExamScreen({super.key});
+  final Map question;
+  final int index;
+
+  const ExamScreen({
+    super.key,
+    required this.index,
+    required this.question,
+  });
 
   @override
   State<ExamScreen> createState() => _ExamScreenState();
 }
 
 class _ExamScreenState extends State<ExamScreen> {
-  List examList = [];
+  ExamDetailController examDetailController = Get.put(ExamDetailController());
+  final PageController pageController = PageController();
+
+  int totalRightQuestion = 0;
+  int currentIndex = 0;
+
+  late Timer _timer;
+  int _start = 0;
+  String timeValue = "";
+
+  void startTimer() {
+    const oneSec = Duration(seconds: 1);
+    _timer = Timer.periodic(
+      oneSec,
+      (Timer timer) {
+        if (_start == 0) {
+          setState(() {
+            timer.cancel();
+            timeOver();
+
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => BottomBarScreen(),
+            ));
+          });
+        } else {
+          setState(() {
+            timeValue = formatSeconds(_start);
+            _start--;
+          });
+        }
+      },
+    );
+  }
+
+  void timeOver() {
+    if (_start == 0) {
+      if (examDetailController.homeScreenExam.isNotEmpty) {
+        examDetailController.historyScreenExam
+            .add(examDetailController.homeScreenExam[widget.index]);
+        examDetailController.homeScreenExam.remove(widget.index);
+      }
+    }
+  }
+
+  String formatSeconds(int seconds) {
+    int hours = seconds ~/ 3600;
+    seconds %= 3600;
+    int minutes = seconds ~/ 60;
+    seconds %= 60;
+
+    String result = '';
+    if (hours > 0) {
+      result += '$hours hour${hours > 1 ? 's' : ''} ';
+    }
+    if (minutes > 0) {
+      result += '$minutes minute${minutes > 1 ? 's' : ''} ';
+    }
+    if (seconds > 0) {
+      result += '$seconds second${seconds > 1 ? 's' : ''} ';
+    }
+
+    return result.trim();
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  int convertSeconds() {
+    String timeString = widget.question["examDuration"];
+    List<String> timeParts = timeString.split(':');
+
+    int hours = int.parse(timeParts[0]);
+    int minutes = int.parse(timeParts[1]);
+
+    int totalMinutes = (hours * 60) + minutes;
+    int totalSeconds = totalMinutes * 60;
+
+    return totalSeconds;
+  }
 
   @override
   void initState() {
-    examList = Question.examList;
+    _start = convertSeconds();
+    startTimer();
     super.initState();
   }
-
-  ExamController examController = Get.put(ExamController());
-
-  final PageController pageController = PageController();
-
-  int total = 0;
-
-  ExamDetailController examDetailController = Get.put(ExamDetailController());
 
   @override
   Widget build(BuildContext context) {
@@ -56,8 +134,8 @@ class _ExamScreenState extends State<ExamScreen> {
                   color: AppColors.greyColor,
                 ),
                 Text(
-                  examDetailController.examDetail["examDuration"],
-                  style: AppTextStyle.largeTextStyle.copyWith(
+                  timeValue,
+                  style: AppTextStyle.regularTextStyle.copyWith(
                     fontSize: 20,
                     color: AppColors.greyColor,
                   ),
@@ -68,7 +146,7 @@ class _ExamScreenState extends State<ExamScreen> {
               child: PageView.builder(
                 physics: NeverScrollableScrollPhysics(),
                 controller: pageController,
-                itemCount: examDetailController.examDetail["questions"].length,
+                itemCount: widget.question["questions"].length,
                 itemBuilder: (context, index) {
                   return ListView(
                     children: [
@@ -101,8 +179,7 @@ class _ExamScreenState extends State<ExamScreen> {
                               height: 20,
                             ),
                             Text(
-                              examDetailController.examDetail["questions"]
-                                  [index]["question"],
+                              widget.question["questions"][index]["question"],
                               style: AppTextStyle.regularTextStyle
                                   .copyWith(color: AppColors.whiteColor),
                               textAlign: TextAlign.justify,
@@ -116,17 +193,20 @@ class _ExamScreenState extends State<ExamScreen> {
                       ListView.builder(
                         shrinkWrap: true,
                         physics: NeverScrollableScrollPhysics(),
-                        itemCount: examList[index]["option"].length,
-                        // itemCount: examDetailController.examDetail["questions"]["options"].length,
+                        itemCount: widget
+                            .question["questions"][index]["options"].length,
                         itemBuilder: (BuildContext context, int optionIndex) {
                           return ListTile(
                             title: InkWell(
                               onTap: () {
-                                examList[index]["grpValue"] = optionIndex;
+                                widget.question["questions"][index]
+                                    ["grpValue"] = optionIndex + 1;
+
                                 setState(() {});
                               },
                               child: Text(
-                                examList[index]["option"][optionIndex],
+                                widget.question["questions"][index]["options"]
+                                    [optionIndex],
                                 style: AppTextStyle.regularTextStyle
                                     .copyWith(fontWeight: FontWeight.w400),
                               ),
@@ -138,10 +218,13 @@ class _ExamScreenState extends State<ExamScreen> {
                                 fillColor: MaterialStateColor.resolveWith(
                                   (states) => AppColors.primaryColor,
                                 ),
-                                value: optionIndex,
-                                groupValue: examList[index]["grpValue"],
+                                value: optionIndex + 1,
+                                groupValue: widget.question["questions"][index]
+                                    ["grpValue"],
                                 onChanged: (value) {
-                                  examList[index]["grpValue"] = value!;
+                                  widget.question["questions"][index]
+                                      ["grpValue"] = value;
+
                                   setState(() {});
                                 },
                               ),
@@ -152,41 +235,73 @@ class _ExamScreenState extends State<ExamScreen> {
                       SizedBox(
                         height: 70,
                       ),
-                      Obx(
-                        () => ButtonView(
-                          onTap: () {
-                            if (examList[index]["grpValue"] == -1) {
-                              toastView(msg: "Please select answer");
-                            } else {
-                              if (examController.currentIndex.value <
-                                  examList.length - 1) {
-                                pageController.nextPage(
-                                  duration: Duration(milliseconds: 400),
-                                  curve: Curves.easeInOut,
-                                );
-                                examController.currentIndex.value++;
-                              } else {
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => MarksScreen(
-                                        examList: examList, total: total),
-                                  ),
-                                );
-                                examController.marksData =
-                                    MarksData(examList: examList, total: total);
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          ButtonView(
+                            width: MediaQuery.of(context).size.width / 2.3,
+                            onTap: () {
+                              currentIndex > 0
+                                  ? pageController.previousPage(
+                                      duration: Duration(milliseconds: 400),
+                                      curve: Curves.easeInOut,
+                                    )
+                                  : null;
+                              currentIndex--;
+                            },
+                            title: "Previous",
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          ButtonView(
+                            width: MediaQuery.of(context).size.width / 2.3,
+                            onTap: () {
+                              if (widget.question["questions"][index]
+                                          ["grpValue"]
+                                      .toString() ==
+                                  widget.question["questions"][index]["answer"]
+                                      .toString()) {
+                                totalRightQuestion++;
                               }
-                            }
-                            if (examList[index]["grpValue"] ==
-                                examList[index]["answer"]) {
-                              total++;
-                            }
-                          },
-                          title: examController.currentIndex.value <
-                                  examList.length - 1
-                              ? "Continue"
-                              : "Finish",
-                        ),
+
+                              if (widget.question["questions"][index]
+                                      ["grpValue"] ==
+                                  -1) {
+                                toastView(msg: "Please select answer");
+                              } else {
+                                if (currentIndex <
+                                    widget.question["questions"].length - 1) {
+                                  pageController.nextPage(
+                                    duration: Duration(milliseconds: 400),
+                                    curve: Curves.easeInOut,
+                                  );
+
+                                  currentIndex++;
+                                } else {
+                                  if (examDetailController
+                                      .homeScreenExam.isNotEmpty) {
+                                    examDetailController.historyScreenExam.add(
+                                        examDetailController
+                                            .homeScreenExam[widget.index]);
+                                    examDetailController.homeScreenExam
+                                        .remove(widget.index);
+                                  }
+
+                                  examDetailController.addQuestion(
+                                    questionList: widget.question,
+                                    rightQuestion: totalRightQuestion,
+                                    context: context,
+                                  );
+                                }
+                              }
+                            },
+                            title: currentIndex <
+                                    widget.question["questions"].length - 1
+                                ? "Next"
+                                : "Finish",
+                          ),
+                        ],
                       ),
                     ],
                   );

@@ -3,6 +3,9 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
+import 'package:myexam/controller/exam_detail_controller.dart';
 import 'package:myexam/screens/history_marks/history_marks_screen.dart';
 
 import '../../config/app_colors.dart';
@@ -17,12 +20,7 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  List examList = [
-    {"examName": "Math"},
-    {"examName": "English"},
-    {"examName": "Physical"},
-    {"examName": "Chemistry"},
-  ];
+  ExamDetailController examDetailController = Get.put(ExamDetailController());
 
   @override
   Widget build(BuildContext context) {
@@ -41,64 +39,83 @@ class _HistoryScreenState extends State<HistoryScreen> {
           SizedBox(
             height: 30,
           ),
-          GridView.builder(
-            shrinkWrap: true,
-            padding: EdgeInsets.symmetric(horizontal: 8),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              mainAxisExtent: 250,
-            ),
-            itemCount: examList.length,
-            itemBuilder: (context, index) {
-              return InkWell(
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => HistoryMarksScreen(),
-                  ));
-                },
-                child: Container(
-                  margin: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(25),
-                    image: DecorationImage(
-                      image: Image.asset(
-                        AppImages.exam,
-                      ).image,
-                      fit: BoxFit.cover,
-                      colorFilter: ColorFilter.srgbToLinearGamma(),
+          Obx(
+            () => examDetailController.isLoader.value == true
+                ? Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.primaryColor,
+                      strokeWidth: 2,
                     ),
-                  ),
-                  child: Column(
-                    children: [
-                      ClipRect(
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
-                          child: Container(
-                            width: 120,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                bottomLeft: Radius.circular(20),
-                                bottomRight: Radius.circular(20),
-                              ),
-                              color: AppColors.whiteColor.withOpacity(0.5),
-                            ),
-                            child: Center(
-                              child: Text(
-                                examList[index]["examName"],
-                                style: AppTextStyle.largeTextStyle.copyWith(
-                                  fontWeight: FontWeight.w800,
+                  )
+                : examDetailController.homeScreenExam.isEmpty
+                    ? Center(
+                        child: Lottie.asset("assets/lottie/empty.json"),
+                      )
+                    : GridView.builder(
+                        shrinkWrap: true,
+                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisExtent: 250,
+                        ),
+                        itemCount:
+                            examDetailController.historyScreenExam.length,
+                        itemBuilder: (context, index) {
+                          return InkWell(
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => HistoryMarksScreen(),
+                              ));
+                            },
+                            child: Container(
+                              margin: EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(25),
+                                image: DecorationImage(
+                                  image: Image.asset(
+                                    AppImages.exam,
+                                  ).image,
+                                  fit: BoxFit.cover,
+                                  colorFilter: ColorFilter.srgbToLinearGamma(),
                                 ),
                               ),
+                              child: Column(
+                                children: [
+                                  ClipRect(
+                                    child: BackdropFilter(
+                                      filter: ImageFilter.blur(
+                                          sigmaX: 3, sigmaY: 3),
+                                      child: Container(
+                                        width: 120,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.only(
+                                            bottomLeft: Radius.circular(20),
+                                            bottomRight: Radius.circular(20),
+                                          ),
+                                          color: AppColors.whiteColor
+                                              .withOpacity(0.5),
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            examDetailController
+                                                    .historyScreenExam[index]
+                                                ["subject"],
+                                            style: AppTextStyle.largeTextStyle
+                                                .copyWith(
+                                              fontWeight: FontWeight.w800,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ),
+                          );
+                        },
                       ),
-                    ],
-                  ),
-                ),
-              );
-            },
           ),
         ],
       ),

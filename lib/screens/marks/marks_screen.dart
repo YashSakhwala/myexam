@@ -10,13 +10,15 @@ import 'package:myexam/widgets/common_widget/button_view.dart';
 import '../../widgets/common_widget/circular_seek_bar_view.dart';
 
 class MarksScreen extends StatefulWidget {
-  final List examList;
-  final int total;
+  final Map questionsList;
+  final int rightQuestions;
+  final int percentage;
 
   const MarksScreen({
     super.key,
-    required this.examList,
-    required this.total,
+    required this.questionsList,
+    required this.rightQuestions,
+    required this.percentage,
   });
 
   @override
@@ -47,7 +49,7 @@ class _MarksScreenState extends State<MarksScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "${widget.total}/${widget.examList.length}",
+                  "${widget.rightQuestions}/${widget.questionsList["questions"].length}",
                   style: AppTextStyle.regularTextStyle,
                 ),
                 Column(
@@ -57,7 +59,7 @@ class _MarksScreenState extends State<MarksScreen> {
                       style: AppTextStyle.largeTextStyle.copyWith(fontSize: 20),
                     ),
                     Text(
-                      "${(widget.total / widget.examList.length * 100).round()}%",
+                      "${widget.percentage}%",
                       style: AppTextStyle.regularTextStyle
                           .copyWith(color: AppColors.primaryColor),
                     ),
@@ -71,7 +73,7 @@ class _MarksScreenState extends State<MarksScreen> {
                       color: AppColors.greyColor,
                     ),
                     Text(
-                      "12:00",
+                      widget.questionsList["examDuration"],
                       style: AppTextStyle.regularTextStyle
                           .copyWith(color: AppColors.greyColor),
                     ),
@@ -90,12 +92,15 @@ class _MarksScreenState extends State<MarksScreen> {
                 crossAxisSpacing: 15,
                 mainAxisSpacing: 15,
               ),
-              itemCount: widget.examList.length,
+              itemCount: widget.questionsList["questions"].length,
               itemBuilder: (context, index) {
                 return InkWell(
                   onTap: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => CheckingScreen(index: index),
+                      builder: (context) => CheckingScreen(
+                        index: index,
+                        questionsList: widget.questionsList["questions"],
+                      ),
                     ));
                   },
                   child: Container(
@@ -123,17 +128,33 @@ class _MarksScreenState extends State<MarksScreen> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(color: AppColors.primaryColor),
-                            color: widget.examList[index]["grpValue"] ==
-                                    widget.examList[index]["answer"]
-                                ? AppColors.greenColor
-                                : AppColors.redColor,
+                            color: widget.questionsList["quesions"][index]
+                                        ["grpValue"] ==
+                                    -1
+                                ? AppColors.redColor
+                                : widget.questionsList["questions"][index]
+                                                ["grpValue"]
+                                            .toString() ==
+                                        widget.questionsList["questions"][index]
+                                                ["answer"]
+                                            .toString()
+                                    ? AppColors.greenColor
+                                    : AppColors.redColor,
                           ),
                           child: Center(
                             child: Image.asset(
-                              widget.examList[index]["grpValue"] ==
-                                      widget.examList[index]["answer"]
-                                  ? AppImages.right
-                                  : AppImages.wrong,
+                              widget.questionsList["quesions"][index]
+                                          ["grpValue"] ==
+                                      -1
+                                  ? AppImages.wrong
+                                  : widget.questionsList["questions"][index]
+                                                  ["grpValue"]
+                                              .toString() ==
+                                          widget.questionsList["questions"]
+                                                  [index]["answer"]
+                                              .toString()
+                                      ? AppImages.right
+                                      : AppImages.wrong,
                               height: 30,
                               color: AppColors.whiteColor,
                             ),
@@ -164,7 +185,8 @@ class _MarksScreenState extends State<MarksScreen> {
           color: AppColors.whiteColor,
           child: ButtonView(
             onTap: () {
-              percentage = (widget.total / widget.examList.length * 100);
+              percentage = widget.percentage.toDouble();
+
               CircularSeekBarView(
                 context: context,
                 progress: percentage,

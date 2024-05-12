@@ -1,17 +1,17 @@
 // ignore_for_file: prefer_const_constructors, sized_box_for_whitespace
 
 import 'package:flutter/material.dart';
-
 import '../../config/app_colors.dart';
 import '../../config/app_style.dart';
-import '../../utils/questions.dart';
 
 class CheckingScreen extends StatefulWidget {
+  final List questionsList;
   final int index;
 
   const CheckingScreen({
     super.key,
     required this.index,
+    required this.questionsList,
   });
 
   @override
@@ -19,14 +19,6 @@ class CheckingScreen extends StatefulWidget {
 }
 
 class _CheckingScreenState extends State<CheckingScreen> {
-  List examList = [];
-
-  @override
-  void initState() {
-    examList = Question.examList;
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,7 +59,7 @@ class _CheckingScreenState extends State<CheckingScreen> {
                     height: 20,
                   ),
                   Text(
-                    examList[widget.index]["question"],
+                    widget.questionsList[widget.index]["question"],
                     style: AppTextStyle.regularTextStyle
                         .copyWith(color: AppColors.whiteColor),
                     textAlign: TextAlign.justify,
@@ -81,18 +73,22 @@ class _CheckingScreenState extends State<CheckingScreen> {
             ListView.builder(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
-              itemCount: examList[widget.index]["option"].length,
+              itemCount: widget.questionsList[widget.index]["options"].length,
               itemBuilder: (BuildContext context, int optionIndex) {
                 return ListTile(
                   title: Text(
-                    examList[widget.index]["option"][optionIndex],
+                    widget.questionsList[widget.index]["options"][optionIndex],
                     style: AppTextStyle.regularTextStyle.copyWith(
                       fontWeight: FontWeight.w400,
-                      color: examList[widget.index]["answer"] == optionIndex
+                      color: widget.questionsList[widget.index]["answer"]
+                                  .toString() ==
+                              (optionIndex + 1).toString()
                           ? AppColors.greenColor
-                          : examList[widget.index]["grpValue"] != optionIndex
-                              ? AppColors.blackColor
-                              : AppColors.redColor,
+                          : widget.questionsList[widget.index]["grpValue"]
+                                      .toString() ==
+                                  (optionIndex + 1).toString()
+                              ? AppColors.redColor
+                              : AppColors.blackColor,
                     ),
                   ),
                   leading: Container(
@@ -100,15 +96,19 @@ class _CheckingScreenState extends State<CheckingScreen> {
                     height: 24,
                     child: Radio(
                       fillColor: MaterialStateColor.resolveWith(
-                        (states) => examList[widget.index]["answer"] ==
-                                optionIndex
+                        (states) => widget.questionsList[widget.index]["answer"]
+                                    .toString() ==
+                                (optionIndex + 1).toString()
                             ? AppColors.greenColor
-                            : examList[widget.index]["grpValue"] != optionIndex
-                                ? AppColors.blackColor
-                                : AppColors.redColor,
+                            : widget.questionsList[widget.index]["grpValue"]
+                                        .toString() ==
+                                    (optionIndex + 1).toString()
+                                ? AppColors.redColor
+                                : AppColors.blackColor,
                       ),
-                      value: optionIndex,
-                      groupValue: examList[widget.index]["grpValue"],
+                      value: optionIndex + 1,
+                      groupValue: widget.questionsList[widget.index]
+                          ["grpValue"],
                       onChanged: (value) {},
                     ),
                   ),

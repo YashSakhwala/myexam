@@ -1,14 +1,23 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:myexam/config/app_style.dart';
 import 'package:myexam/controller/exam_detail_controller.dart';
-import 'package:myexam/screens/exam/exam_screen.dart';
-import 'package:myexam/widgets/common_widget/button_view.dart';
+import '../../config/app_colors.dart';
+import '../../widgets/common_widget/button_view.dart';
+import '../exam/exam_screen.dart';
 
 class ExamDetailScreen extends StatefulWidget {
-  const ExamDetailScreen({super.key});
+  final Map question;
+  final int index;
+
+  const ExamDetailScreen({
+    super.key,
+    required this.question, required this.index,
+  });
 
   @override
   State<ExamDetailScreen> createState() => _ExamDetailScreenState();
@@ -16,6 +25,80 @@ class ExamDetailScreen extends StatefulWidget {
 
 class _ExamDetailScreenState extends State<ExamDetailScreen> {
   ExamDetailController examDetailController = Get.put(ExamDetailController());
+
+  late Timer _timer;
+  int _start = 0;
+  String timeValue = "";
+
+  void startTimer() {
+    const oneSec = Duration(seconds: 1);
+    _timer = Timer.periodic(
+      oneSec,
+      (Timer timer) {
+        if (_start == 0) {
+          setState(() {
+            timer.cancel();
+          });
+        } else {
+          setState(() {
+            timeValue = formatSeconds(_start);
+            _start--;
+          });
+        }
+      },
+    );
+  }
+
+  String formatSeconds(int seconds) {
+    int days = seconds ~/ (24 * 3600);
+    seconds %= (24 * 3600);
+    int hours = seconds ~/ 3600;
+    seconds %= 3600;
+    int minutes = seconds ~/ 60;
+    seconds %= 60;
+
+    String result = '';
+    if (days > 0) {
+      result += '$days day${days > 1 ? 's' : ''} ';
+    }
+    if (hours > 0) {
+      result += '$hours hour${hours > 1 ? 's' : ''} ';
+    }
+    if (minutes > 0) {
+      result += '$minutes minute${minutes > 1 ? 's' : ''} ';
+    }
+    if (seconds > 0) {
+      result += '$seconds second${seconds > 1 ? 's' : ''} ';
+    }
+
+    return result.trim();
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  int calculateTimeDifferenceInSeconds(String givenDate, String givenTime) {
+    DateTime currentDateTime = DateTime.now();
+
+    DateFormat dateFormat = DateFormat("yyyy-MM-dd hh:mm a");
+    DateTime givenDateTime = dateFormat.parse("$givenDate $givenTime");
+
+    int differenceInSeconds =
+        givenDateTime.difference(currentDateTime).inSeconds;
+
+    return differenceInSeconds;
+  }
+
+  @override
+  void initState() {
+    _start = calculateTimeDifferenceInSeconds(
+        widget.question["date"], widget.question["time"]);
+    startTimer();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +129,7 @@ class _ExamDetailScreenState extends State<ExamDetailScreen> {
                   width: 35,
                 ),
                 Text(
-                  "Gangdo",
+                  widget.question["teacherName"],
                   style: AppTextStyle.smallTextStyle,
                 ),
               ],
@@ -65,7 +148,26 @@ class _ExamDetailScreenState extends State<ExamDetailScreen> {
                   width: 56,
                 ),
                 Text(
-                  examDetailController.examDetail["subject"],
+                  widget.question["subject"],
+                  style: AppTextStyle.smallTextStyle,
+                ),
+              ],
+            ),
+            Divider(),
+            SizedBox(
+              height: 10,
+            ),
+            Row(
+              children: [
+                Text(
+                  "Exam code: ",
+                  style: AppTextStyle.regularTextStyle.copyWith(fontSize: 18),
+                ),
+                SizedBox(
+                  width: 60,
+                ),
+                Text(
+                  widget.question["code"].toString(),
                   style: AppTextStyle.smallTextStyle,
                 ),
               ],
@@ -84,7 +186,7 @@ class _ExamDetailScreenState extends State<ExamDetailScreen> {
                   width: 67,
                 ),
                 Text(
-                  examDetailController.examDetail["mcq"].toString(),
+                  widget.question["mcq"].toString(),
                   style: AppTextStyle.smallTextStyle,
                 ),
               ],
@@ -103,7 +205,7 @@ class _ExamDetailScreenState extends State<ExamDetailScreen> {
                   width: 36,
                 ),
                 Text(
-                  examDetailController.examDetail["examDuration"],
+                  widget.question["examDuration"],
                   style: AppTextStyle.smallTextStyle,
                 ),
               ],
@@ -122,7 +224,7 @@ class _ExamDetailScreenState extends State<ExamDetailScreen> {
                   width: 115,
                 ),
                 Text(
-                  examDetailController.examDetail["date"],
+                  widget.question["date"],
                   style: AppTextStyle.smallTextStyle,
                 ),
               ],
@@ -141,23 +243,50 @@ class _ExamDetailScreenState extends State<ExamDetailScreen> {
                   width: 112,
                 ),
                 Text(
-                  examDetailController.examDetail["time"],
+                  widget.question["time"],
                   style: AppTextStyle.smallTextStyle,
                 ),
               ],
             ),
             Divider(),
             SizedBox(
-              height: 50,
+              height: 70,
             ),
-            ButtonView(
-              title: "Continue",
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => ExamScreen(),
-                ));
-              },
-            ),
+            _start == 0
+                ? ButtonView(
+                    title: "Continue",
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => ExamScreen(
+                          question: widget.question,
+                          index: widget.index,
+                        ),
+                      ));
+                    },
+                  )
+                : Center(
+                    child: Text(
+                      "Exam will start in\n$timeValue",
+                      textAlign: TextAlign.center,
+                      style: AppTextStyle.regularTextStyle.copyWith(
+                        color: AppColors.redColor,
+                      ),
+                    ),
+                  ),
+
+            // ButtonView(
+            //   title: "Continue",
+            //   onTap: () {
+            //     Navigator.pushReplacement(
+            //         context,
+            //         MaterialPageRoute(
+            //           builder: (context) => ExamScreen(
+            //             question: widget.question,
+            //             index: widget.index,
+            //           ),
+            //         ));
+            //   },
+            // ),
           ],
         ),
       ),

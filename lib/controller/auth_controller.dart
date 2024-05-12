@@ -97,6 +97,7 @@ class AuthController extends GetxController {
         "email": email,
         "phoneNo": phoneNo,
         "image": url,
+        "examCode":[],
       });
 
       await LocalStorage.sharedPreferences.setBool(LocalStorage.logIn, true);

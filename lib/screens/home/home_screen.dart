@@ -1,8 +1,9 @@
 // ignore_for_file: prefer_const_constructors
-
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 import 'package:myexam/config/app_colors.dart';
 import 'package:myexam/config/app_image.dart';
 import 'package:myexam/config/app_style.dart';
@@ -10,6 +11,7 @@ import 'package:myexam/controller/exam_detail_controller.dart';
 import 'package:myexam/screens/exam_detail/exam_detail_screen.dart';
 import 'package:myexam/widgets/common_widget/button_view.dart';
 import 'package:myexam/widgets/common_widget/text_field_view.dart';
+import 'package:myexam/widgets/common_widget/toast_view.dart';
 
 import '../../controller/auth_controller.dart';
 
@@ -24,15 +26,15 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController search = TextEditingController();
 
   AuthController authController = Get.put(AuthController());
-
   ExamDetailController examDetailController = Get.put(ExamDetailController());
 
-  List examList = [
-    {"examName": "Math"},
-    {"examName": "English"},
-    {"examName": "Physical"},
-    {"examName": "Chemistry"},
-  ];
+  @override
+  void initState() {
+    examDetailController.getExam(
+      context: context,
+    );
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -118,6 +120,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             controller: search,
                             fullTextView: true,
                             hintText: "Enter exam code",
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              LengthLimitingTextInputFormatter(6),
+                            ],
                           ),
                         ),
                         Spacer(),
@@ -126,10 +132,29 @@ class _HomeScreenState extends State<HomeScreen> {
                           height: 50,
                           width: 100,
                           onTap: () {
-                            examDetailController.getExam(
-                              code: int.parse(search.text),
-                              context: context,
-                            );
+                            bool foundMatch = false;
+                            if (examDetailController.examCodeList.isNotEmpty) {
+                              for (String code
+                                  in examDetailController.examCodeList) {
+                                if (code == search.text) {
+                                  foundMatch = true;
+                                  break;
+                                }
+                              }
+                            }
+
+                            if (foundMatch == true) {
+                              toastView(msg: "Exam is already available");
+                            } else if (search.text.isEmpty) {
+                              toastView(msg: "Please add subject code");
+                            } else {
+                              examDetailController.addExamCode(
+                                examCode: search.text,
+                                context: context,
+                              );
+
+                              search.clear();
+                            }
                           },
                         ),
                       ],
@@ -143,67 +168,90 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             Obx(
               () => Expanded(
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  padding: EdgeInsets.symmetric(horizontal: 8),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisExtent: 250,
-                  ),
-                  itemCount: examDetailController.examData.length,
-                  itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => ExamDetailScreen(),
-                        ));
-                      },
-                      child: Container(
-                        margin: EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(25),
-                          image: DecorationImage(
-                            image: Image.asset(
-                              AppImages.exam,
-                            ).image,
-                            fit: BoxFit.cover,
-                            colorFilter: ColorFilter.srgbToLinearGamma(),
-                          ),
+                child: examDetailController.isLoader.value == true
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primaryColor,
+                          strokeWidth: 2,
                         ),
-                        child: Column(
-                          children: [
-                            ClipRect(
-                              child: BackdropFilter(
-                                filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+                      )
+                    : examDetailController.homeScreenExam.isEmpty
+                        ? Center(
+                            child: Lottie.asset("assets/lottie/empty.json"),
+                          )
+                        : GridView.builder(
+                            shrinkWrap: true,
+                            padding: EdgeInsets.symmetric(horizontal: 8),
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisExtent: 250,
+                            ),
+                            itemCount:
+                                examDetailController.homeScreenExam.length,
+                            itemBuilder: (context, index) {
+                              return InkWell(
+                                onTap: () {
+                                  Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (context) => ExamDetailScreen(
+                                      question: examDetailController
+                                          .homeScreenExam[index],
+                                      index: index,
+                                    ),
+                                  ));
+                                },
                                 child: Container(
-                                  width: 120,
-                                  height: 40,
+                                  margin: EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.only(
-                                      bottomLeft: Radius.circular(20),
-                                      bottomRight: Radius.circular(20),
+                                    borderRadius: BorderRadius.circular(25),
+                                    image: DecorationImage(
+                                      image: Image.asset(
+                                        AppImages.exam,
+                                      ).image,
+                                      fit: BoxFit.cover,
+                                      colorFilter:
+                                          ColorFilter.srgbToLinearGamma(),
                                     ),
-                                    color:
-                                        AppColors.whiteColor.withOpacity(0.5),
                                   ),
-                                  child: Center(
-                                    child: Text(
-                                      examDetailController.examData[index]
-                                          ["subject"],
-                                      style: AppTextStyle.largeTextStyle
-                                          .copyWith(
-                                              fontWeight: FontWeight.w800),
-                                    ),
+                                  child: Column(
+                                    children: [
+                                      ClipRect(
+                                        child: BackdropFilter(
+                                          filter: ImageFilter.blur(
+                                              sigmaX: 3, sigmaY: 3),
+                                          child: Container(
+                                            width: 120,
+                                            height: 40,
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.only(
+                                                bottomLeft: Radius.circular(20),
+                                                bottomRight:
+                                                    Radius.circular(20),
+                                              ),
+                                              color: AppColors.whiteColor
+                                                  .withOpacity(0.5),
+                                            ),
+                                            child: Center(
+                                              child: Text(
+                                                examDetailController
+                                                        .homeScreenExam[index]
+                                                    ["subject"],
+                                                style: AppTextStyle
+                                                    .largeTextStyle
+                                                    .copyWith(
+                                                        fontWeight:
+                                                            FontWeight.w800),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                              );
+                            },
+                          ),
               ),
             ),
           ],

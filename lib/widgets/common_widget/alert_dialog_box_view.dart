@@ -8,6 +8,8 @@ void showAlertDialogBox({
   required BuildContext context,
   required Function() yesOnTap,
   required Function() noOnTap,
+  required String buttonYesTitle,
+  required String buttonNoTitle,
   required String title,
   required String subTitle,
 }) {
@@ -19,17 +21,17 @@ void showAlertDialogBox({
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             ButtonView(
-              title: "Yes",
+              title: buttonYesTitle,
               onTap: yesOnTap,
-              width: 70,
+              width: 80,
             ),
             SizedBox(
               width: 8,
             ),
             ButtonView(
-              title: "No",
+              title: buttonNoTitle,
               onTap: noOnTap,
-              width: 70,
+              width: 80,
             ),
           ],
         ),

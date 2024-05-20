@@ -21,6 +21,7 @@ class CheckingScreen extends StatefulWidget {
 class _CheckingScreenState extends State<CheckingScreen> {
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -115,6 +116,21 @@ class _CheckingScreenState extends State<CheckingScreen> {
                 );
               },
             ),
+            SizedBox(
+              height: 70,
+            ),
+            widget.questionsList[widget.index].keys.contains("grpValue")
+                ? Container()
+                : Text(
+                    "You didn't attempt any answer",
+                    style: AppTextStyle.regularTextStyle,
+                  ),
+            widget.questionsList[widget.index]["grpValue"].toString() == "-1"
+                ? Text(
+                    "You didn't attempt any answer",
+                    style: AppTextStyle.regularTextStyle,
+                  )
+                : Container(),
           ],
         ),
       ),

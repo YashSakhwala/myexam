@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: non_constant_identifier_names, prefer_const_constructors
 
 import 'package:flutter/material.dart';
 import 'package:myexam/config/app_colors.dart';
@@ -11,7 +11,7 @@ void CircularSeekBarView({
   required double progress,
   required Function() onTap,
 }) {
-  int progressValue = progress.round();
+  double progressValue = progress;
 
   showDialog(
     context: context,
@@ -37,7 +37,6 @@ void CircularSeekBarView({
             outerThumbRadius: 6,
             outerThumbStrokeWidth: 10,
             outerThumbColor: AppColors.whiteColor,
-            
             child: Center(
               child: Text(
                 "$progressValue%",

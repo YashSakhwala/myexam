@@ -1,13 +1,11 @@
-// ignore_for_file: use_build_context_synchronously, prefer_const_constructors, avoid_print
+// ignore_for_file: avoid_print, use_build_context_synchronously, prefer_const_constructors
 
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../config/local_storage.dart';
 import '../screens/bottom_bar/bottom_bar_screen.dart';
 import '../widgets/common_widget/indicator_view.dart';
@@ -97,7 +95,8 @@ class AuthController extends GetxController {
         "email": email,
         "phoneNo": phoneNo,
         "image": url,
-        "examCode":[],
+        "examCode": [],
+        "percentage": "0",
       });
 
       await LocalStorage.sharedPreferences.setBool(LocalStorage.logIn, true);
@@ -105,12 +104,6 @@ class AuthController extends GetxController {
           .setString(LocalStorage.userId, userCredential.user!.uid);
 
       getProfileData(context: context);
-
-      Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (context) => BottomBarScreen(),
-          ),
-          (route) => false);
     } catch (e) {
       toastView(msg: "User is already exist");
       Navigator.of(context).pop();
@@ -126,8 +119,6 @@ class AuthController extends GetxController {
     var data = await firebaseFirestore.collection("Student").doc(userId).get();
 
     userData.value = data.data() ?? {};
-
-    print(data.data());
 
     Future.delayed(
       Duration(seconds: 4),

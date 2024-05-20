@@ -16,7 +16,8 @@ class ExamDetailScreen extends StatefulWidget {
 
   const ExamDetailScreen({
     super.key,
-    required this.question, required this.index,
+    required this.question,
+    required this.index,
   });
 
   @override
@@ -94,8 +95,20 @@ class _ExamDetailScreenState extends State<ExamDetailScreen> {
 
   @override
   void initState() {
-    _start = calculateTimeDifferenceInSeconds(
-        widget.question["date"], widget.question["time"]);
+    DateTime currentDateTime = DateTime.now();
+
+    DateFormat dateFormat = DateFormat("yyyy-MM-dd hh:mm a");
+    DateTime givenDateTime = dateFormat
+        .parse("${widget.question["date"]} ${widget.question["time"]}");
+
+    bool isTimeCheck = givenDateTime.isBefore(currentDateTime);
+
+    if (isTimeCheck != true) {
+      _start = calculateTimeDifferenceInSeconds(
+          widget.question["date"], widget.question["time"]);
+    } else {
+      _start = 0;
+    }
     startTimer();
     super.initState();
   }
@@ -273,20 +286,6 @@ class _ExamDetailScreenState extends State<ExamDetailScreen> {
                       ),
                     ),
                   ),
-
-            // ButtonView(
-            //   title: "Continue",
-            //   onTap: () {
-            //     Navigator.pushReplacement(
-            //         context,
-            //         MaterialPageRoute(
-            //           builder: (context) => ExamScreen(
-            //             question: widget.question,
-            //             index: widget.index,
-            //           ),
-            //         ));
-            //   },
-            // ),
           ],
         ),
       ),

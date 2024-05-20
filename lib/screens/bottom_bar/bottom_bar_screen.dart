@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, non_constant_identifier_names, prefer_const_literals_to_create_immutables, sized_box_for_whitespace
+// ignore_for_file: prefer_const_constructors, non_constant_identifier_names, sized_box_for_whitespace
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -8,7 +8,6 @@ import 'package:myexam/controller/bottom_bar_controller.dart';
 import 'package:myexam/screens/history/history_screen.dart';
 import 'package:myexam/screens/home/home_screen.dart';
 import 'package:myexam/screens/leaderboard/leaderboard_screen.dart';
-
 import '../setting/setting_screen.dart';
 
 class BottomBarScreen extends StatefulWidget {
@@ -19,14 +18,14 @@ class BottomBarScreen extends StatefulWidget {
 }
 
 class _BottomBarScreenState extends State<BottomBarScreen> {
+  BottomBarController bottomBarController = Get.put(BottomBarController());
+
   List BottomBarScreens = [
     HomeScreen(),
     LeaderBoardScreen(),
     HistoryScreen(),
     SettingScreen(),
   ];
-
-  BottomBarController bottomBarController = Get.put(BottomBarController());
 
   @override
   Widget build(BuildContext context) {
@@ -47,14 +46,13 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
                   children: [
                     Obx(
                       () => Image.asset(
-                        bottomBarController.index.value == 0
-                            ? AppImages.fillHome
-                            : AppImages.blankHome,
-                        height: 25,
-                        color: bottomBarController.index.value == 0
-                            ? AppColors.primaryColor
-                            : AppColors.blackColor,
-                      ),
+                          bottomBarController.index.value == 0
+                              ? AppImages.fillHome
+                              : AppImages.blankHome,
+                          height: 25,
+                          color: bottomBarController.index.value == 0
+                              ? AppColors.primaryColor
+                              : AppColors.blackColor),
                     ),
                     Obx(
                       () => Text(
@@ -79,14 +77,13 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
                   children: [
                     Obx(
                       () => Image.asset(
-                        bottomBarController.index.value == 1
-                            ? AppImages.fillTrophy
-                            : AppImages.blankTrophy,
-                        height: 25,
-                        color: bottomBarController.index.value == 1
-                            ? AppColors.primaryColor
-                            : AppColors.blackColor,
-                      ),
+                          bottomBarController.index.value == 1
+                              ? AppImages.fillTrophy
+                              : AppImages.blankTrophy,
+                          height: 25,
+                          color: bottomBarController.index.value == 1
+                              ? AppColors.primaryColor
+                              : AppColors.blackColor),
                     ),
                     Obx(
                       () => Text(
@@ -111,14 +108,13 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
                   children: [
                     Obx(
                       () => Image.asset(
-                        bottomBarController.index.value == 2
-                            ? AppImages.fillHistory
-                            : AppImages.blankHistory,
-                        height: 25,
-                        color: bottomBarController.index.value == 2
-                            ? AppColors.primaryColor
-                            : AppColors.blackColor,
-                      ),
+                          bottomBarController.index.value == 2
+                              ? AppImages.fillHistory
+                              : AppImages.blankHistory,
+                          height: 25,
+                          color: bottomBarController.index.value == 2
+                              ? AppColors.primaryColor
+                              : AppColors.blackColor),
                     ),
                     Obx(
                       () => Text(
@@ -143,14 +139,13 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
                   children: [
                     Obx(
                       () => Image.asset(
-                        bottomBarController.index.value == 3
-                            ? AppImages.fillProfile
-                            : AppImages.blankProfile,
-                        height: 25,
-                        color: bottomBarController.index.value == 3
-                            ? AppColors.primaryColor
-                            : AppColors.blackColor,
-                      ),
+                          bottomBarController.index.value == 3
+                              ? AppImages.fillProfile
+                              : AppImages.blankProfile,
+                          height: 25,
+                          color: bottomBarController.index.value == 3
+                              ? AppColors.primaryColor
+                              : AppColors.blackColor),
                     ),
                     Obx(
                       () => Text(

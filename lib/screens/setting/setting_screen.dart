@@ -1,9 +1,10 @@
-// ignore_for_file: prefer_const_constructors, use_build_context_synchronously
+// ignore_for_file: prefer_const_constructors, use_build_context_synchronously, no_leading_underscores_for_local_identifiers
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:myexam/controller/exam_detail_controller.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../config/app_colors.dart';
 import '../../config/app_image.dart';
 import '../../config/app_style.dart';
@@ -24,6 +25,7 @@ class SettingScreen extends StatefulWidget {
 
 class _SettingScreenState extends State<SettingScreen> {
   AuthController authController = Get.put(AuthController());
+  ExamDetailController examDetailController = Get.put(ExamDetailController());
 
   void logOut() {
     showAlertDialogBox(
@@ -46,18 +48,14 @@ class _SettingScreenState extends State<SettingScreen> {
       noOnTap: () {
         Navigator.of(context).pop();
       },
+      buttonYesTitle: "Yes",
+      buttonNoTitle: "No",
       title: "Log Out",
       subTitle: "Are you sure you want to log out?",
     );
   }
 
-  List profileItems = [
-    {
-      "icon": AppImages.torch,
-      "name": "Dark light Mode",
-      "isSwitch": true,
-      "value": false
-    },
+  List settingItems = [
     {"icon": AppImages.terms, "name": "Privacy & terms", "isSwitch": false},
     {"icon": AppImages.contactUs, "name": "Contact us", "isSwitch": false},
   ];
@@ -78,31 +76,33 @@ class _SettingScreenState extends State<SettingScreen> {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(25),
-                child: Column(
-                  children: [
-                    Obx(
-                      () => Row(
+                child: Obx(
+                  () => Column(
+                    children: [
+                      Row(
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                authController.userData["name"],
-                                style: AppTextStyle.largeTextStyle.copyWith(
-                                  fontSize: 35,
-                                  color: AppColors.whiteColor,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  authController.userData["name"],
+                                  style: AppTextStyle.largeTextStyle.copyWith(
+                                    fontSize: 35,
+                                    color: AppColors.whiteColor,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                              ),
-                              Text(
-                                authController.userData["email"],
-                                style: AppTextStyle.smallTextStyle.copyWith(
-                                  fontSize: 12,
-                                  color: AppColors.whiteColor,
+                                Text(
+                                  authController.userData["email"],
+                                  style: AppTextStyle.smallTextStyle.copyWith(
+                                    fontSize: 12,
+                                    color: AppColors.whiteColor,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                          Spacer(),
                           Container(
                             height: 75,
                             width: 75,
@@ -135,45 +135,46 @@ class _SettingScreenState extends State<SettingScreen> {
                           ),
                         ],
                       ),
-                    ),
-                    SizedBox(
-                      height: 30,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "4",
-                              style: AppTextStyle.largeTextStyle.copyWith(
-                                fontSize: 16,
-                                color: AppColors.whiteColor,
+                      SizedBox(
+                        height: 30,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                examDetailController.historyScreenExam.length
+                                    .toString(),
+                                style: AppTextStyle.largeTextStyle.copyWith(
+                                  fontSize: 16,
+                                  color: AppColors.whiteColor,
+                                ),
                               ),
-                            ),
-                            Text(
-                              "Exam taken",
-                              style: AppTextStyle.smallTextStyle.copyWith(
-                                fontSize: 14,
-                                color: AppColors.whiteColor,
+                              Text(
+                                "Exam taken",
+                                style: AppTextStyle.smallTextStyle.copyWith(
+                                  fontSize: 14,
+                                  color: AppColors.whiteColor,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        ButtonView(
-                          title: "Edit Profile",
-                          height: 42,
-                          width: 100,
-                          onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => ProfileScreen(),
-                            ));
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
+                            ],
+                          ),
+                          ButtonView(
+                            title: "Edit Profile",
+                            height: 42,
+                            width: 100,
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => ProfileScreen(),
+                              ));
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -182,41 +183,47 @@ class _SettingScreenState extends State<SettingScreen> {
             ),
             ListView.builder(
               shrinkWrap: true,
-              itemCount: profileItems.length,
+              itemCount: settingItems.length,
               itemBuilder: (context, index) {
                 return Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: 10,
                     vertical: 1,
                   ),
-                  child: ListTile(
-                    leading: Image.asset(
-                      profileItems[index]["icon"],
-                      color: AppColors.primaryColor,
-                      scale: 19,
-                    ),
-                    title: Text(profileItems[index]["name"]),
-                    trailing: profileItems[index]["isSwitch"]
-                        ? CupertinoSwitch(
-                            activeColor:
-                                AppColors.primaryColor.withOpacity(0.6),
-                            thumbColor: AppColors.primaryColor,
-                            trackColor: AppColors.blackColor.withOpacity(0.2),
-                            value: profileItems[index]["value"],
-                            onChanged: (bool value) {
-                              setState(() {
-                                profileItems[index]["value"] = value;
-                              });
-                            },
-                          )
-                        : Icon(
-                            Icons.arrow_forward_ios_rounded,
-                            color: AppColors.greyColor,
-                            size: 17,
-                          ),
-                    shape: Border(
-                      bottom: BorderSide(
-                          color: AppColors.greyColor.withOpacity(0.4)),
+                  child: InkWell(
+                    onTap: () async {
+                      if (index == 0) {
+                        final Uri _url = Uri.parse(
+                            "https://doc-hosting.flycricket.io/quiz-up-privacy-policy/9b5208c7-80bc-4e74-8d1f-796fd7ae4d4b/privacy");
+
+                        if (!await launchUrl(_url)) {
+                          throw Exception("Could not launch $_url");
+                        }
+                      } else {
+                        final Uri emailLaunchUri = Uri(
+                          scheme: "mailto",
+                          path: "yashsakhwala@gmail.com",
+                        );
+
+                        await launchUrl(emailLaunchUri);
+                      }
+                    },
+                    child: ListTile(
+                      leading: Image.asset(
+                        settingItems[index]["icon"],
+                        color: AppColors.primaryColor,
+                        scale: 19,
+                      ),
+                      title: Text(settingItems[index]["name"]),
+                      trailing: Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        color: AppColors.greyColor,
+                        size: 17,
+                      ),
+                      shape: Border(
+                        bottom: BorderSide(
+                            color: AppColors.greyColor.withOpacity(0.4)),
+                      ),
                     ),
                   ),
                 );

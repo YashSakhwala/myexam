@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print, use_build_context_synchronously, unused_local_variable
+// ignore_for_file: avoid_print, use_build_context_synchronously
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +6,8 @@ import 'package:get/get.dart';
 import 'package:myexam/screens/marks/marks_screen.dart';
 import 'package:myexam/widgets/common_widget/toast_view.dart';
 import '../config/local_storage.dart';
+import '../screens/history_marks/history_marks_screen.dart';
+import '../widgets/common_widget/indicator_view.dart';
 
 class ExamDetailController extends GetxController {
   RxList examCodeList = [].obs;
@@ -15,6 +17,10 @@ class ExamDetailController extends GetxController {
 
   RxList homeScreenExam = [].obs;
   RxList historyScreenExam = [].obs;
+
+  RxMap examResult = {}.obs;
+
+  RxList studentData = [].obs;
 
   Future<void> getExam({
     required BuildContext context,
@@ -55,20 +61,18 @@ class ExamDetailController extends GetxController {
       );
 
       if (isCheck) {
-        homeScreenExam.add(examData[i]);
-
-        // var data = await firebaseFirestore
-        //     .collection("Exams")
-        //     .doc(examData[i]["code"].toString())
-        //     .collection("Answer")
-        //     .doc(userId)
-        //     .get();
-        // var temp = data.data();
-        // if (temp != null) {
-        //   historyScreenExam.add(examData[i]);
-        // } else {
-        //   homeScreenExam.add(examData[i]);
-        // }
+        var data = await firebaseFirestore
+            .collection("Exams")
+            .doc(examData[i]["code"].toString())
+            .collection("Answer")
+            .doc(userId)
+            .get();
+        var temp = data.data();
+        if (temp != null) {
+          historyScreenExam.add(examData[i]);
+        } else {
+          homeScreenExam.add(examData[i]);
+        }
       } else {
         historyScreenExam.add(examData[i]);
       }
@@ -154,15 +158,25 @@ class ExamDetailController extends GetxController {
     required int rightQuestion,
     required BuildContext context,
   }) async {
+    indicatorView(context);
+
     FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
 
     var code = questionList["code"];
     String? userId =
         LocalStorage.sharedPreferences.getString(LocalStorage.userId);
 
+    var data = await firebaseFirestore.collection("Student").doc(userId).get();
+    var studentData = data.data();
+    var name = studentData!["name"];
+    var image = studentData["image"];
+
     var totalQuestions = questionList["questions"].length;
     var rightQuestions = rightQuestion;
-    var percentage = (rightQuestions / totalQuestions * 100).round();
+
+    var percentage = (rightQuestions / totalQuestions * 100);
+    String tempPercentage = percentage.toStringAsFixed(2);
+
     var questionsList = questionList;
 
     await firebaseFirestore
@@ -173,11 +187,23 @@ class ExamDetailController extends GetxController {
         .set({
       "total": totalQuestions,
       "right": rightQuestions,
-      "percentage": percentage,
+      "percentage": tempPercentage,
       "answer": questionList["questions"],
+      "name": name,
+      "image": image,
     });
 
+    var stud = await firebaseFirestore.collection("Student").doc(userId).get();
 
+    var temp = stud.data();
+
+    double changeDouble = double.parse(temp!["percentage"]);
+    var totalPerecentage = (changeDouble + percentage) / 2;
+    String tempTotalPercentage = totalPerecentage.toStringAsFixed(2);
+
+    await firebaseFirestore.collection("Student").doc(userId).update({
+      "percentage": tempTotalPercentage,
+    });
 
     Navigator.pushReplacement(
         context,
@@ -185,9 +211,51 @@ class ExamDetailController extends GetxController {
           builder: (context) => MarksScreen(
             questionsList: questionsList,
             rightQuestions: rightQuestions,
-            percentage: percentage,
+            percentage: double.parse(tempPercentage),
           ),
         ));
   }
 
+  Future<void> getQuestion({
+    required String code,
+    required String examDuration,
+    required BuildContext context,
+  }) async {
+    FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
+
+    String? userId =
+        LocalStorage.sharedPreferences.getString(LocalStorage.userId);
+
+    var data = await firebaseFirestore
+        .collection("Exams")
+        .doc(code)
+        .collection("Answer")
+        .doc(userId)
+        .get();
+
+    examResult.value = data.data()!;
+
+    print(examResult);
+
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => HistoryMarksScreen(
+        examDuration: examDuration,
+      ),
+    ));
+  }
+
+  Future<void> getStudentData() async {
+    isLoader.value = true;
+
+    FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
+
+    var data = await firebaseFirestore.collection("Student").get();
+
+    studentData.value = data.docs.map((doc) => doc.data()).toList();
+
+    studentData.value = studentData.toList()
+      ..sort((a, b) => b["percentage"].compareTo(a["percentage"]));
+
+    isLoader.value = false;
+  }
 }

@@ -1,4 +1,5 @@
 // ignore_for_file: prefer_const_constructors
+
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,7 +13,6 @@ import 'package:myexam/screens/exam_detail/exam_detail_screen.dart';
 import 'package:myexam/widgets/common_widget/button_view.dart';
 import 'package:myexam/widgets/common_widget/text_field_view.dart';
 import 'package:myexam/widgets/common_widget/toast_view.dart';
-
 import '../../controller/auth_controller.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -30,9 +30,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
-    examDetailController.getExam(
-      context: context,
-    );
+    Future.microtask(() => examDetailController.getExam(
+          context: context,
+        ));
     super.initState();
   }
 
@@ -58,33 +58,35 @@ class _HomeScreenState extends State<HomeScreen> {
                     Obx(
                       () => Row(
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Hello,",
-                                style: AppTextStyle.regularTextStyle.copyWith(
-                                  fontSize: 15,
-                                  color: AppColors.whiteColor,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Hello,",
+                                  style: AppTextStyle.regularTextStyle.copyWith(
+                                    fontSize: 15,
+                                    color: AppColors.whiteColor,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                authController.userData["name"],
-                                style: AppTextStyle.largeTextStyle.copyWith(
-                                  fontSize: 35,
-                                  color: AppColors.whiteColor,
+                                Text(
+                                  authController.userData["name"],
+                                  style: AppTextStyle.largeTextStyle.copyWith(
+                                    fontSize: 35,
+                                    color: AppColors.whiteColor,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                              ),
-                              Text(
-                                "Let's workout to get some gains",
-                                style: AppTextStyle.smallTextStyle.copyWith(
-                                  fontSize: 12,
-                                  color: AppColors.whiteColor,
+                                Text(
+                                  "Let's workout to get some gains",
+                                  style: AppTextStyle.smallTextStyle.copyWith(
+                                    fontSize: 12,
+                                    color: AppColors.whiteColor,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                          Spacer(),
                           CircleAvatar(
                             maxRadius: 38,
                             backgroundColor: AppColors.whiteColor,
@@ -120,9 +122,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             controller: search,
                             fullTextView: true,
                             hintText: "Enter exam code",
-                            keyboardType: TextInputType.number,
                             inputFormatters: [
-                              LengthLimitingTextInputFormatter(6),
+                              LengthLimitingTextInputFormatter(8),
                             ],
                           ),
                         ),

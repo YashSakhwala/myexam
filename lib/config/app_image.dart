@@ -16,11 +16,9 @@ class AppImages {
   static const String fillProfile = "assets/icons/fill_profile.png";
 
   //Home screen images
-  static const String boy = "assets/images/boy.png";
   static const String exam = "assets/images/exam.jpg";
 
   //Profile screen icons
-  static const String torch = "assets/icons/torch.png";
   static const String terms = "assets/icons/terms.png";
   static const String contactUs = "assets/icons/contact_us.png";
 

@@ -1,5 +1,6 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, use_build_context_synchronously
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -8,8 +9,11 @@ import 'package:myexam/config/app_image.dart';
 import 'package:myexam/config/app_style.dart';
 import 'package:myexam/controller/auth_controller.dart';
 import 'package:myexam/screens/auth/sign_up_screen.dart';
+import 'package:myexam/screens/welcome/welcome_screen.dart';
 import 'package:myexam/widgets/common_widget/button_view.dart';
+import 'package:myexam/widgets/common_widget/indicator_view.dart';
 import 'package:myexam/widgets/common_widget/text_field_view.dart';
+import 'package:myexam/widgets/common_widget/toast_view.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -87,12 +91,35 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(
                 height: 10,
               ),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: Text(
-                  "Forgot password?",
-                  style: AppTextStyle.smallTextStyle.copyWith(
-                    color: AppColors.primaryColor,
+              InkWell(
+                onTap: () async {
+                  if (RegExp(
+                          r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                      .hasMatch(email.text)) {
+                    indicatorView(context);
+
+                    FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+
+                    await firebaseAuth.sendPasswordResetEmail(
+                      email: email.text,
+                    );
+
+                    Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (context) => WelcomeScreen(),
+                        ),
+                        (route) => false);
+                  } else {
+                    toastView(msg: "Please enter valid email");
+                  }
+                },
+                child: Align(
+                  alignment: Alignment.bottomRight,
+                  child: Text(
+                    "Forgot password?",
+                    style: AppTextStyle.smallTextStyle.copyWith(
+                      color: AppColors.primaryColor,
+                    ),
                   ),
                 ),
               ),

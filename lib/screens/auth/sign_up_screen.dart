@@ -1,13 +1,16 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, use_build_context_synchronously
 
 import 'dart:io';
-
+import 'package:email_otp/email_otp.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:myexam/controller/auth_controller.dart';
 import 'package:myexam/screens/auth/login_screen.dart';
+import 'package:myexam/screens/auth/otp_verification_screen.dart';
+import 'package:myexam/widgets/common_widget/indicator_view.dart';
 import 'package:myexam/widgets/common_widget/toast_view.dart';
 import '../../config/app_colors.dart';
 import '../../config/app_image.dart';
@@ -25,7 +28,7 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   AuthController authController = Get.put(AuthController());
 
-final TextEditingController name = TextEditingController();
+  final TextEditingController name = TextEditingController();
   final TextEditingController email = TextEditingController();
   final TextEditingController phoneNo = TextEditingController();
   final TextEditingController password = TextEditingController();
@@ -143,6 +146,9 @@ final TextEditingController name = TextEditingController();
                 keyboardType: TextInputType.phone,
                 needValidator: true,
                 phoneNoValidator: true,
+                inputFormatters: [
+                  LengthLimitingTextInputFormatter(10),
+                ],
               ),
               SizedBox(
                 height: 5,
@@ -210,19 +216,36 @@ final TextEditingController name = TextEditingController();
               ),
               ButtonView(
                 title: "Continue",
-                onTap: () {
+                onTap: () async {
                   if (_formkey.currentState!.validate()) {
                     if (password.text != verifyPassword.text) {
                       toastView(msg: "Both passwords are not same");
                     } else if (authController.imagePath.value.isEmpty) {
                       toastView(msg: "Please select profile image");
                     } else {
-                      authController.signUp(
-                        name: name.text,
-                        email: email.text,
-                        password: password.text,
-                        phoneNo: phoneNo.text,
-                        context: context,
+                      indicatorView(context);
+
+                      EmailOTP myAuth = EmailOTP();
+
+                      myAuth.setConfig(
+                        appEmail: "yashsakhwala@gmail.com",
+                        appName: "Quiz Up",
+                        userEmail: email.text,
+                        otpLength: 6,
+                        otpType: OTPType.digitsOnly,
+                      );
+
+                      await myAuth.sendOTP();
+
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => OTPVerificationScreen(
+                              name: name.text,
+                              email: email.text,
+                              phoneNo: phoneNo.text,
+                              password: password.text,
+                              myAuth: myAuth),
+                        ),
                       );
                     }
                   }

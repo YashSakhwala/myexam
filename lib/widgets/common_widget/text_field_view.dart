@@ -4,10 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:myexam/config/app_colors.dart';
 import 'package:myexam/config/app_style.dart';
-
 import '../../utils/validation.dart';
 
-class TextFieldView extends StatelessWidget {
+class TextFieldView extends StatefulWidget {
   final String? labelText;
   final String? hintText;
   final Widget? suffixIcon;
@@ -23,6 +22,7 @@ class TextFieldView extends StatelessWidget {
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
   final bool? enabled;
+  final TextStyle? style;
 
   const TextFieldView({
     super.key,
@@ -41,26 +41,33 @@ class TextFieldView extends StatelessWidget {
     this.keyboardType,
     this.inputFormatters,
     this.enabled,
+    this.style,
   });
 
   @override
+  State<TextFieldView> createState() => _TextFieldViewState();
+}
+
+class _TextFieldViewState extends State<TextFieldView> {
+  @override
   Widget build(BuildContext context) {
     return TextFormField(
-      style: AppTextStyle.regularTextStyle.copyWith(fontSize: 18),
-      controller: controller,
-      keyboardType: keyboardType,
-      inputFormatters: inputFormatters,
-      enabled: enabled,
+      style:
+          widget.style ?? AppTextStyle.regularTextStyle.copyWith(fontSize: 18),
+      controller: widget.controller,
+      keyboardType: widget.keyboardType,
+      inputFormatters: widget.inputFormatters,
+      enabled: widget.enabled,
       cursorColor: AppColors.primaryColor,
-      obscureText: obscureText!,
+      obscureText: widget.obscureText!,
       decoration: InputDecoration(
-        filled: fullTextView,
+        filled: widget.fullTextView,
         fillColor: AppColors.whiteColor,
         contentPadding: EdgeInsets.symmetric(
-          vertical: fullTextView == true ? 10 : 12,
-          horizontal: fullTextView == true ? 17 : 5,
+          vertical: widget.fullTextView == true ? 10 : 12,
+          horizontal: widget.fullTextView == true ? 17 : 5,
         ),
-        enabledBorder: fullTextView == true
+        enabledBorder: widget.fullTextView == true
             ? OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30),
                 borderSide: BorderSide(color: AppColors.whiteColor),
@@ -68,7 +75,7 @@ class TextFieldView extends StatelessWidget {
             : UnderlineInputBorder(
                 borderSide: BorderSide(color: AppColors.greyColor),
               ),
-        focusedBorder: fullTextView == true
+        focusedBorder: widget.fullTextView == true
             ? OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30),
                 borderSide: BorderSide(color: AppColors.whiteColor),
@@ -76,25 +83,25 @@ class TextFieldView extends StatelessWidget {
             : UnderlineInputBorder(
                 borderSide: BorderSide(color: AppColors.greyColor),
               ),
-        labelText: labelText,
+        labelText: widget.labelText,
         labelStyle: AppTextStyle.smallTextStyle.copyWith(
           fontSize: 16,
           color: AppColors.greyColor,
         ),
-        hintText: hintText,
+        hintText: widget.hintText,
         hintStyle: AppTextStyle.smallTextStyle.copyWith(
           fontSize: 16,
           color: AppColors.greyColor,
         ),
-        suffixIcon: suffixIcon,
-        prefixIcon: prefixIcon,
+        suffixIcon: widget.suffixIcon,
+        prefixIcon: widget.prefixIcon,
       ),
-      validator: needValidator
+      validator: widget.needValidator
           ? (value) => TextFieldValidation.validation(
-                isEmailValidator: emailValidator,
-                isPasswordValidator: passwordValidator,
-                isPhoneNumberValidator: phoneNoValidator,
-                message: labelText,
+                isEmailValidator: widget.emailValidator,
+                isPasswordValidator: widget.passwordValidator,
+                isPhoneNumberValidator: widget.phoneNoValidator,
+                message: widget.labelText,
                 value: value,
               )
           : null,

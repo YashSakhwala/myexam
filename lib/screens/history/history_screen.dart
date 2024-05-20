@@ -1,13 +1,10 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:myexam/controller/exam_detail_controller.dart';
-import 'package:myexam/screens/history_marks/history_marks_screen.dart';
-
 import '../../config/app_colors.dart';
 import '../../config/app_image.dart';
 import '../../config/app_style.dart';
@@ -47,12 +44,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       strokeWidth: 2,
                     ),
                   )
-                : examDetailController.homeScreenExam.isEmpty
+                : examDetailController.historyScreenExam.isEmpty
                     ? Center(
                         child: Lottie.asset("assets/lottie/empty.json"),
                       )
                     : GridView.builder(
                         shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
                         padding: EdgeInsets.symmetric(horizontal: 8),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
@@ -63,9 +61,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         itemBuilder: (context, index) {
                           return InkWell(
                             onTap: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => HistoryMarksScreen(),
-                              ));
+                              examDetailController.getQuestion(
+                                code: examDetailController
+                                    .historyScreenExam[index]["code"],
+                                examDuration: examDetailController
+                                    .historyScreenExam[index]["examDuration"],
+                                context: context,
+                              );
                             },
                             child: Container(
                               margin: EdgeInsets.all(8),

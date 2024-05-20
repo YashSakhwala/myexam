@@ -6,7 +6,6 @@ import 'package:lottie/lottie.dart';
 import 'package:myexam/config/app_colors.dart';
 import 'package:myexam/config/local_storage.dart';
 import 'package:myexam/screens/welcome/welcome_screen.dart';
-
 import '../controller/auth_controller.dart';
 
 class SplashScreen extends StatefulWidget {

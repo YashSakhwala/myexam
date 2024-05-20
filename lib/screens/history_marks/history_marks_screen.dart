@@ -1,20 +1,27 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'package:myexam/screens/leaderboard/leaderboard_screen.dart';
+import 'package:get/get.dart';
+import 'package:myexam/controller/exam_detail_controller.dart';
 import '../../config/app_colors.dart';
 import '../../config/app_image.dart';
 import '../../config/app_style.dart';
+import '../checking/checking_screen.dart';
 
 class HistoryMarksScreen extends StatefulWidget {
-  const HistoryMarksScreen({super.key});
+  final String examDuration;
+
+  const HistoryMarksScreen({
+    super.key,
+    required this.examDuration,
+  });
 
   @override
   State<HistoryMarksScreen> createState() => _HistoryMarksScreenState();
 }
 
 class _HistoryMarksScreenState extends State<HistoryMarksScreen> {
-  // ExamController examController = Get.put(ExamController());
+  ExamDetailController examDetailController = Get.put(ExamDetailController());
 
   @override
   Widget build(BuildContext context) {
@@ -23,28 +30,12 @@ class _HistoryMarksScreenState extends State<HistoryMarksScreen> {
         padding: const EdgeInsets.fromLTRB(25, 25, 25, 0),
         child: ListView(
           children: [
-            Row(
-              children: [
-                Spacer(),
-                Text(
-                  "Review",
-                  style: AppTextStyle.largeTextStyle
-                      .copyWith(fontWeight: FontWeight.w500),
-                ),
-                Spacer(),
-                InkWell(
-                  onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => LeaderBoardScreen(),
-                    ));
-                  },
-                  child: Image.asset(
-                    AppImages.blankTrophy,
-                    height: 23,
-                    color: AppColors.primaryColor,
-                  ),
-                ),
-              ],
+            Center(
+              child: Text(
+                "Review",
+                style: AppTextStyle.largeTextStyle
+                    .copyWith(fontWeight: FontWeight.w500),
+              ),
             ),
             SizedBox(
               height: 30,
@@ -52,21 +43,21 @@ class _HistoryMarksScreenState extends State<HistoryMarksScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Text(
-                //   "${examController.marksData.total}/${examController.marksData.examList.length}",
-                //   style: AppTextStyle.regularTextStyle,
-                // ),
+                Text(
+                  "${examDetailController.examResult["right"]}/${examDetailController.examResult["total"]}",
+                  style: AppTextStyle.regularTextStyle,
+                ),
                 Column(
                   children: [
                     Text(
                       "You are right",
                       style: AppTextStyle.largeTextStyle.copyWith(fontSize: 20),
                     ),
-                    // Text(
-                    //   "${(examController.marksData.total! / examController.marksData.examList.length * 100).round()}%",
-                    //   style: AppTextStyle.regularTextStyle
-                    //       .copyWith(color: AppColors.primaryColor),
-                    // ),
+                    Text(
+                      "${(examDetailController.examResult["right"] / examDetailController.examResult["total"] * 100).toStringAsFixed(2)} %",
+                      style: AppTextStyle.regularTextStyle
+                          .copyWith(color: AppColors.primaryColor),
+                    ),
                   ],
                 ),
                 Row(
@@ -77,7 +68,7 @@ class _HistoryMarksScreenState extends State<HistoryMarksScreen> {
                       color: AppColors.greyColor,
                     ),
                     Text(
-                      "12:00",
+                      widget.examDuration,
                       style: AppTextStyle.regularTextStyle
                           .copyWith(color: AppColors.greyColor),
                     ),
@@ -96,14 +87,17 @@ class _HistoryMarksScreenState extends State<HistoryMarksScreen> {
                 crossAxisSpacing: 15,
                 mainAxisSpacing: 15,
               ),
-              // itemCount: examController.marksData.examList.length,
-              itemCount: 5,
+              itemCount: examDetailController.examResult["total"],
               itemBuilder: (context, index) {
                 return InkWell(
                   onTap: () {
-                    // Navigator.of(context).push(MaterialPageRoute(
-                    //   builder: (context) => CheckingScreen(index: index),
-                    // ));
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => CheckingScreen(
+                        index: index,
+                        questionsList:
+                            examDetailController.examResult["answer"],
+                      ),
+                    ));
                   },
                   child: Container(
                     margin: EdgeInsets.all(4),
@@ -130,24 +124,28 @@ class _HistoryMarksScreenState extends State<HistoryMarksScreen> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(color: AppColors.primaryColor),
-                            // color: examController.marksData.examList[index]
-                            //             ["grpValue"] ==
-                            //         examController.marksData.examList[index]
-                            //             ["answer"]
-                            //     ? AppColors.greenColor
-                            //     : AppColors.redColor,
+                            color: examDetailController.examResult["answer"]
+                                            [index]["grpValue"]
+                                        .toString() ==
+                                    examDetailController.examResult["answer"]
+                                            [index]["answer"]
+                                        .toString()
+                                ? AppColors.greenColor
+                                : AppColors.redColor,
                           ),
                           child: Center(
-                            // child: Image.asset(
-                            //   examController.marksData.examList[index]
-                            //               ["grpValue"] ==
-                            //           examController.marksData.examList[index]
-                            //               ["answer"]
-                            //       ? AppImages.right
-                            //       : AppImages.wrong,
-                            //   height: 30,
-                            //   color: AppColors.whiteColor,
-                            // ),
+                            child: Image.asset(
+                              examDetailController.examResult["answer"][index]
+                                              ["grpValue"]
+                                          .toString() ==
+                                      examDetailController.examResult["answer"]
+                                              [index]["answer"]
+                                          .toString()
+                                  ? AppImages.right
+                                  : AppImages.wrong,
+                              height: 30,
+                              color: AppColors.whiteColor,
+                            ),
                           ),
                         ),
                         SizedBox(

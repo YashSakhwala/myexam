@@ -1,7 +1,6 @@
-// ignore_for_file: prefer_const_constructors, deprecated_member_use, non_constant_identifier_names
+// ignore_for_file: prefer_const_constructors, deprecated_member_use
 
 import 'package:flutter/material.dart';
-
 import '../../config/app_colors.dart';
 
 void indicatorView(BuildContext context) {

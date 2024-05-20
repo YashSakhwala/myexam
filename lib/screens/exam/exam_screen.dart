@@ -1,11 +1,12 @@
-// ignore_for_file: prefer_const_constructors, sized_box_for_whitespace
+// ignore_for_file: prefer_const_constructors, deprecated_member_use, sized_box_for_whitespace
 
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:myexam/config/app_colors.dart';
 import 'package:myexam/controller/exam_detail_controller.dart';
-import 'package:myexam/screens/bottom_bar/bottom_bar_screen.dart';
+import 'package:myexam/widgets/common_widget/alert_dialog_box_view.dart';
 import 'package:myexam/widgets/common_widget/button_view.dart';
 import 'package:myexam/widgets/common_widget/toast_view.dart';
 import '../../config/app_style.dart';
@@ -43,11 +44,11 @@ class _ExamScreenState extends State<ExamScreen> {
         if (_start == 0) {
           setState(() {
             timer.cancel();
-            timeOver();
-
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => BottomBarScreen(),
-            ));
+            examDetailController.addQuestion(
+              questionList: widget.question,
+              rightQuestion: totalRightQuestion,
+              context: context,
+            );
           });
         } else {
           setState(() {
@@ -57,16 +58,6 @@ class _ExamScreenState extends State<ExamScreen> {
         }
       },
     );
-  }
-
-  void timeOver() {
-    if (_start == 0) {
-      if (examDetailController.homeScreenExam.isNotEmpty) {
-        examDetailController.historyScreenExam
-            .add(examDetailController.homeScreenExam[widget.index]);
-        examDetailController.homeScreenExam.remove(widget.index);
-      }
-    }
   }
 
   String formatSeconds(int seconds) {
@@ -96,6 +87,22 @@ class _ExamScreenState extends State<ExamScreen> {
   }
 
   int convertSeconds() {
+    int differenceInSeconds = 0;
+
+    DateTime now = DateTime.now();
+    DateFormat dateFormat = DateFormat('h:mm a');
+    DateTime givenTime = dateFormat.parse(widget.question["time"]);
+
+    givenTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      givenTime.hour,
+      givenTime.minute,
+    );
+
+    differenceInSeconds = now.difference(givenTime).inSeconds;
+
     String timeString = widget.question["examDuration"];
     List<String> timeParts = timeString.split(':');
 
@@ -105,7 +112,7 @@ class _ExamScreenState extends State<ExamScreen> {
     int totalMinutes = (hours * 60) + minutes;
     int totalSeconds = totalMinutes * 60;
 
-    return totalSeconds;
+    return totalSeconds - differenceInSeconds;
   }
 
   @override
@@ -117,198 +124,197 @@ class _ExamScreenState extends State<ExamScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            SizedBox(
-              height: 30,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Icon(
-                  Icons.watch_later_outlined,
-                  size: 25,
-                  color: AppColors.greyColor,
-                ),
-                Text(
-                  timeValue,
-                  style: AppTextStyle.regularTextStyle.copyWith(
-                    fontSize: 20,
+    return WillPopScope(
+      onWillPop: () async {
+        showAlertDialogBox(
+            context: context,
+            buttonYesTitle: "Exit",
+            yesOnTap: () {
+              examDetailController.addQuestion(
+                questionList: widget.question,
+                rightQuestion: totalRightQuestion,
+                context: context,
+              );
+            },
+            buttonNoTitle: "Cancel",
+            noOnTap: () {
+              Navigator.of(context).pop();
+            },
+            title: "Exit Exam",
+            subTitle:
+                "Are you sure you want to exit the exam? Your progress will be lost.");
+        return false;
+      },
+      child: Scaffold(
+        body: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              SizedBox(
+                height: 30,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Icon(
+                    Icons.watch_later_outlined,
+                    size: 25,
                     color: AppColors.greyColor,
                   ),
-                ),
-              ],
-            ),
-            Expanded(
-              child: PageView.builder(
-                physics: NeverScrollableScrollPhysics(),
-                controller: pageController,
-                itemCount: widget.question["questions"].length,
-                itemBuilder: (context, index) {
-                  return ListView(
-                    children: [
-                      Container(
-                        width: MediaQuery.of(context).size.width,
-                        padding: EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: AppColors.primaryColor,
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primaryColor.withOpacity(0.4),
-                              spreadRadius: 1,
-                              blurRadius: 13,
-                              offset: Offset(0, 15),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Question ${index + 1}",
-                              style: AppTextStyle.largeTextStyle.copyWith(
-                                fontSize: 20,
-                                color: AppColors.whiteColor,
+                  Text(
+                    timeValue,
+                    style: AppTextStyle.regularTextStyle.copyWith(
+                      fontSize: 20,
+                      color: AppColors.greyColor,
+                    ),
+                  ),
+                ],
+              ),
+              Expanded(
+                child: PageView.builder(
+                  physics: NeverScrollableScrollPhysics(),
+                  controller: pageController,
+                  itemCount: widget.question["questions"].length,
+                  itemBuilder: (context, index) {
+                    return ListView(
+                      children: [
+                        Container(
+                          width: MediaQuery.of(context).size.width,
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: AppColors.primaryColor,
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primaryColor.withOpacity(0.4),
+                                spreadRadius: 1,
+                                blurRadius: 13,
+                                offset: Offset(0, 15),
                               ),
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            Text(
-                              widget.question["questions"][index]["question"],
-                              style: AppTextStyle.regularTextStyle
-                                  .copyWith(color: AppColors.whiteColor),
-                              textAlign: TextAlign.justify,
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(
-                        height: 30,
-                      ),
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: widget
-                            .question["questions"][index]["options"].length,
-                        itemBuilder: (BuildContext context, int optionIndex) {
-                          return ListTile(
-                            title: InkWell(
-                              onTap: () {
-                                widget.question["questions"][index]
-                                    ["grpValue"] = optionIndex + 1;
-
-                                setState(() {});
-                              },
-                              child: Text(
-                                widget.question["questions"][index]["options"]
-                                    [optionIndex],
-                                style: AppTextStyle.regularTextStyle
-                                    .copyWith(fontWeight: FontWeight.w400),
-                              ),
-                            ),
-                            leading: Container(
-                              width: 24,
-                              height: 24,
-                              child: Radio(
-                                fillColor: MaterialStateColor.resolveWith(
-                                  (states) => AppColors.primaryColor,
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Question ${index + 1}",
+                                style: AppTextStyle.largeTextStyle.copyWith(
+                                  fontSize: 20,
+                                  color: AppColors.whiteColor,
                                 ),
-                                value: optionIndex + 1,
-                                groupValue: widget.question["questions"][index]
-                                    ["grpValue"],
-                                onChanged: (value) {
+                              ),
+                              SizedBox(
+                                height: 20,
+                              ),
+                              Text(
+                                widget.question["questions"][index]["question"],
+                                style: AppTextStyle.regularTextStyle
+                                    .copyWith(color: AppColors.whiteColor),
+                                textAlign: TextAlign.justify,
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 30,
+                        ),
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: widget
+                              .question["questions"][index]["options"].length,
+                          itemBuilder: (BuildContext context, int optionIndex) {
+                            return ListTile(
+                              title: InkWell(
+                                onTap: () {
                                   widget.question["questions"][index]
-                                      ["grpValue"] = value;
+                                      ["grpValue"] = optionIndex + 1;
 
                                   setState(() {});
                                 },
+                                child: Text(
+                                  widget.question["questions"][index]["options"]
+                                      [optionIndex],
+                                  style: AppTextStyle.regularTextStyle
+                                      .copyWith(fontWeight: FontWeight.w400),
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
-                      SizedBox(
-                        height: 70,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          ButtonView(
-                            width: MediaQuery.of(context).size.width / 2.3,
-                            onTap: () {
-                              currentIndex > 0
-                                  ? pageController.previousPage(
-                                      duration: Duration(milliseconds: 400),
-                                      curve: Curves.easeInOut,
-                                    )
-                                  : null;
-                              currentIndex--;
-                            },
-                            title: "Previous",
-                          ),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          ButtonView(
-                            width: MediaQuery.of(context).size.width / 2.3,
-                            onTap: () {
-                              if (widget.question["questions"][index]
-                                          ["grpValue"]
-                                      .toString() ==
-                                  widget.question["questions"][index]["answer"]
-                                      .toString()) {
-                                totalRightQuestion++;
-                              }
+                              leading: Container(
+                                width: 24,
+                                height: 24,
+                                child: Radio(
+                                  fillColor: MaterialStateColor.resolveWith(
+                                    (states) => AppColors.primaryColor,
+                                  ),
+                                  value: optionIndex + 1,
+                                  groupValue: widget.question["questions"]
+                                      [index]["grpValue"],
+                                  onChanged: (value) {
+                                    widget.question["questions"][index]
+                                        ["grpValue"] = value;
 
-                              if (widget.question["questions"][index]
-                                      ["grpValue"] ==
-                                  -1) {
-                                toastView(msg: "Please select answer");
+                                    setState(() {});
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        SizedBox(
+                          height: 70,
+                        ),
+                        ButtonView(
+                          onTap: () {
+                            if (widget.question["questions"][index]["grpValue"]
+                                    .toString() ==
+                                widget.question["questions"][index]["answer"]
+                                    .toString()) {
+                              totalRightQuestion++;
+                            }
+
+                            if (widget.question["questions"][index]["grpValue"]
+                                    .toString() ==
+                                "-1") {
+                              toastView(msg: "Please select answer");
+                            } else {
+                              if (currentIndex <
+                                  widget.question["questions"].length - 1) {
+                                pageController.nextPage(
+                                  duration: Duration(milliseconds: 400),
+                                  curve: Curves.easeInOut,
+                                );
+
+                                currentIndex++;
                               } else {
-                                if (currentIndex <
-                                    widget.question["questions"].length - 1) {
-                                  pageController.nextPage(
-                                    duration: Duration(milliseconds: 400),
-                                    curve: Curves.easeInOut,
-                                  );
-
-                                  currentIndex++;
-                                } else {
-                                  if (examDetailController
-                                      .homeScreenExam.isNotEmpty) {
-                                    examDetailController.historyScreenExam.add(
-                                        examDetailController
-                                            .homeScreenExam[widget.index]);
-                                    examDetailController.homeScreenExam
-                                        .remove(widget.index);
-                                  }
-
-                                  examDetailController.addQuestion(
-                                    questionList: widget.question,
-                                    rightQuestion: totalRightQuestion,
-                                    context: context,
-                                  );
+                                if (examDetailController
+                                    .homeScreenExam.isNotEmpty) {
+                                  examDetailController.historyScreenExam.add(
+                                      examDetailController
+                                          .homeScreenExam[widget.index]);
+                                  examDetailController.homeScreenExam
+                                      .remove(widget.index);
                                 }
+
+                                examDetailController.addQuestion(
+                                  questionList: widget.question,
+                                  rightQuestion: totalRightQuestion,
+                                  context: context,
+                                );
                               }
-                            },
-                            title: currentIndex <
-                                    widget.question["questions"].length - 1
-                                ? "Next"
-                                : "Finish",
-                          ),
-                        ],
-                      ),
-                    ],
-                  );
-                },
+                            }
+                          },
+                          title: currentIndex <
+                                  widget.question["questions"].length - 1
+                              ? "Next"
+                              : "Finish",
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

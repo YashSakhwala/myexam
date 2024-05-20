@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print, use_build_context_synchronously
+// ignore_for_file: avoid_print, use_build_context_synchronously, prefer_typing_uninitialized_variables
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -198,7 +198,14 @@ class ExamDetailController extends GetxController {
     var temp = stud.data();
 
     double changeDouble = double.parse(temp!["percentage"]);
-    var totalPerecentage = (changeDouble + percentage) / 2;
+
+    var totalPerecentage;
+    if (changeDouble == 0.00) {
+      totalPerecentage = percentage;
+    } else {
+      totalPerecentage = (changeDouble + percentage) / 2;
+    }
+
     String tempTotalPercentage = totalPerecentage.toStringAsFixed(2);
 
     await firebaseFirestore.collection("Student").doc(userId).update({

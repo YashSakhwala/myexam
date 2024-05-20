@@ -25,28 +25,29 @@ class _LeaderBoardScreenState extends State<LeaderBoardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: ListView(
-          children: [
-            Center(
-              child: Text(
-                "Leaderboard",
-                style: AppTextStyle.largeTextStyle.copyWith(fontSize: 20),
-              ),
-            ),
-            SizedBox(
-              height: 30,
-            ),
-            Obx(
-              () => examDetailController.isLoader.value == true
-                  ? Center(
-                      child: CircularProgressIndicator(
-                        color: AppColors.primaryColor,
-                        strokeWidth: 2,
+      body: Obx(
+        () => examDetailController.isLoader.value == true
+            ? Center(
+                child: CircularProgressIndicator(
+                  color: AppColors.primaryColor,
+                  strokeWidth: 2,
+                ),
+              )
+            : Padding(
+                padding: const EdgeInsets.all(16),
+                child: ListView(
+                  children: [
+                    Center(
+                      child: Text(
+                        "Leaderboard",
+                        style:
+                            AppTextStyle.largeTextStyle.copyWith(fontSize: 20),
                       ),
-                    )
-                  : ListView.builder(
+                    ),
+                    SizedBox(
+                      height: 30,
+                    ),
+                    ListView.builder(
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
                       itemCount: examDetailController.studentData.length,
@@ -102,30 +103,33 @@ class _LeaderBoardScreenState extends State<LeaderBoardScreen> {
                                   SizedBox(
                                     width: 30,
                                   ),
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        examDetailController.studentData[index]
-                                            ["name"],
-                                        style: AppTextStyle.largeTextStyle
-                                            .copyWith(
-                                          fontWeight: FontWeight.w500,
+                                  Expanded(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          examDetailController
+                                              .studentData[index]["name"],
+                                          style: AppTextStyle.largeTextStyle
+                                              .copyWith(
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                      ),
-                                      Text(
-                                        "${examDetailController.studentData[index]["percentage"]} %",
-                                        style: AppTextStyle.smallTextStyle
-                                            .copyWith(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w500,
+                                        Text(
+                                          "${examDetailController.studentData[index]["percentage"]} %",
+                                          style: AppTextStyle.smallTextStyle
+                                              .copyWith(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w500,
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                  Spacer(),
                                   Container(
                                     height: 30,
                                     width: 30,
@@ -163,9 +167,9 @@ class _LeaderBoardScreenState extends State<LeaderBoardScreen> {
                         );
                       },
                     ),
-            ),
-          ],
-        ),
+                  ],
+                ),
+              ),
       ),
     );
   }
